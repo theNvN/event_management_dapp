@@ -30,3 +30,39 @@
     transform: rotate(360deg);
   }
 }
+
+.body {
+  height: 100%;
+  width: 100%;
+  font-family: "Rubik";
+}
+
+.wrapper {
+  width: 100%;
+}
+
+.container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-top: 50px;
+}
+
+#appTitle {
+  font-size: 2em;
+  font-weight: bold;
+  background: #000;
+  color: #fff;
+  padding: 25px 0px;
+  text-align: center;
+}
+
+#userLoginAddress {
+  width: 50%;
+  font-size: 1.5em;
+  background: #000;
+  color: #fff;
+  padding: 15px;
+  border-radius: 10px;
+  text-align: center;
+}

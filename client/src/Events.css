@@ -1,0 +1,87 @@
+.eventsWrapper {
+  width: 90%;
+  display: flex;
+  flex-direction: column;
+  margin-top: 30px;
+  align-items: center;
+}
+
+.eventsList {
+  display: grid;
+  grid-template-columns: auto auto auto;
+  width: 98%;
+  background: #f2f2f2;
+  padding: 20px;
+  border-radius: 10px;
+}
+
+#eventsListHeader {
+  width: 99%;
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  margin-bottom: 5px;
+}
+
+#showAddEventFormBtn {
+  border: solid black 2px;
+  border-radius: 20px;
+  cursor: pointer;
+  font-weight: bold;
+}
+
+#eventsListLabel {
+  text-align: center;
+  font-size: 2em;
+  font-weight: bold;
+}
+
+.event {
+  width: 450px;
+  display: flex;
+  flex-direction: column;
+  margin: 20px;
+  background: #fff;
+  border-radius: 10px;
+}
+
+.event:hover {
+   box-shadow: 1px 1px 10px;
+}
+
+.upper {
+  display: flex;
+  flex-direction: column;
+  height: 150px;
+  background: #e6ffe6;
+  padding: 20px;
+  border-radius: 10px 10px 0px 0px;
+  cursor: pointer;
+  align-items: center;
+}
+
+.eventId {
+  align-self: flex-start;
+  font-size: 0.8em;
+}
+
+.isEventOpen {
+  font-weight: bold;
+}
+
+.lower {
+  display: flex;
+  flex-direction: column;
+  padding: 20px;
+  font-size: 0.9em;
+  align-items: center;
+}
+
+.eventTitle {
+  font-size: 1.2em;
+  font-weight: bold;
+}
+
+.buyTicketBtn {
+  margin: 10px 20px;
+}

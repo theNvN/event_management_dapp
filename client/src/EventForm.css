@@ -1,0 +1,45 @@
+.eventFormContainer {
+  width: 60%;
+  display: flex;
+  flex-direction: column;
+  background: #f2f2f2;
+  margin-top: 30px;
+  padding: 20px;
+  border-radius: 10px;
+  align-items: center;
+}
+
+#eventFormLabel {
+  font-size: 1.8em;
+  font-weight: bold;
+}
+
+#addEventForm {
+  display: flex;
+  flex-direction: column;
+  margin-top: 50px;
+}
+
+#addEventForm > label {
+  font-size: 1.1em;
+  margin-bottom: 20px;
+}
+
+label > input {
+  width: 550px;
+}
+
+#goBackToEvents {
+  align-self: flex-start;
+  font-weight: bold;
+  font-size: 1.1em;
+  padding: 5px;
+  background: #fff;
+  border: solid black 2px;
+  border-radius: 20px;
+  cursor: pointer;
+}
+
+#goBackToEvents:hover {
+  box-shadow: 1px 1px 5px;
+}

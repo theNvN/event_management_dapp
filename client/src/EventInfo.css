@@ -1,0 +1,73 @@
+.eventInfoContainer {
+  width: 95%;
+  display: flex;
+  flex-direction: column;
+  background: #f2f2f2;
+  align-items: center;
+  margin-top: 20px;
+  border-radius: 10px;
+  padding: 20px;
+}
+
+#goBackToEvents {
+  align-self: flex-start;
+  font-weight: bold;
+  font-size: 1.1em;
+  padding: 5px;
+  background: #fff;
+  border: solid black 2px;
+  border-radius: 20px;
+  cursor: pointer;
+}
+
+#goBackToEvents:hover {
+  box-shadow: 1px 1px 5px;
+}
+
+#infoEventTitle {
+  font-size: 4em;
+  font-weight: bold;
+}
+
+#infoEventIsOpen > div {
+  display: inline;
+  font-weight: bold;
+}
+
+#infoEventIsOpen {
+  margin-top: 5px;
+}
+
+#infoEventDescription > div {
+  margin-top: 60px;
+  font-size: 1.2em;
+  font-weight: bold;
+}
+
+#infoEventDescription {
+  align-self: flex-start;
+  margin: 10px 40px;
+}
+
+#infoTicketInfo {
+  display: flex;
+  flex-direction: column;
+  margin-top: 40px;
+  background: #fff;
+  padding: 30px 140px;
+  border: solid black 2px;
+  border-radius: 5px;
+  align-items: center;
+}
+
+#infoTicketInfoLabel {
+  font-size: 1.4em;
+  margin-bottom: 20px;
+}
+
+#infoFormBuyTickets {
+  display: flex;
+  flex-direction: column;
+  margin-top: 20px;
+  text-align: center;
+}
