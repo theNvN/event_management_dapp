@@ -22,7 +22,7 @@ class App extends Component {
       accounts: null,
       contract: null,
 
-      loginAddress: "0xl0g1n4ddr33ssth151swh4t5h0uld1d0",
+      loginAddress: "0x0000000000000000000000000000000000000000",
       inputNoOfTickets: "",
       inputEventTitle: "",
       inputEventTicketsCount: "",
@@ -70,9 +70,16 @@ class App extends Component {
         deployedNetwork && deployedNetwork.address,
       );
 
-      // Set web3, accounts, and contract to the state, and then proceed with an
-      // example of interacting with the contract's methods.
-      this.setState({ web3, accounts, contract: instance });
+      
+
+      // Set state
+      this.setState({
+       web3,
+       accounts,
+       contract: instance,
+       loginAddress: accounts[0]
+      });
+
     } catch (error) {
       // Catch any errors for any of the above operations.
       alert(
@@ -174,7 +181,7 @@ class App extends Component {
     } else if (this.state.viewMode == VIEW_MODE_EVENT_INFO) {
       renderComponent = (
         <EventInfo
-          event={this.state.events[0]}
+          event={this.state.events[0] /*this.state.selectedEventId must be passed*/}
           handleNoOfTicketsChange={this.handleNoOfTicketsChange}
           buyTickets={this.buyTickets}
           goBackToEvents={this.goBackToEvents}/>

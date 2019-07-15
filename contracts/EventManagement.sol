@@ -3,11 +3,11 @@ pragma solidity ^0.5.0;
 
 contract EventManagement {
 
-
     address payable public owner;
 
     uint public idGenerator;
 
+    uint[] eventIds;
 
     struct Event {
         string title;
@@ -18,7 +18,6 @@ contract EventManagement {
         mapping (address => uint) buyers;
         bool isOpen;
     }
-
 
     mapping (uint => Event) events;
 
@@ -47,6 +46,8 @@ contract EventManagement {
 
         uint eventId = idGenerator;
         events[idGenerator] = evt;
+
+        eventIds.push(eventId);
         idGenerator++;
 
         emit LogEventAdded(title, description, price, ticketsAvailable, eventId);
