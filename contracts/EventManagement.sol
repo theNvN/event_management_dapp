@@ -6,15 +6,14 @@ contract EventManagement {
 
     address payable public owner;
 
-    uint   PRICE_TICKET = 100 wei;
-
     uint public idGenerator;
 
 
     struct Event {
+        string title;
         string description;
-        string website;
         uint ticketsAvailable;
+        uint ticketPrice;
         uint sales;
         mapping (address => uint) buyers;
         bool isOpen;
@@ -23,7 +22,7 @@ contract EventManagement {
 
     mapping (uint => Event) events;
 
-    event LogEventAdded(string desc, string url, uint ticketsAvailable, uint eventId);
+    event LogEventAdded(string title, string desc, uint ticketPrice, uint ticketsAvailable, uint eventId);
     event LogBuyTickets(address buyer, uint eventId, uint numTickets);
     event LogGetRefund(address accountRefunded, uint eventId, uint numTickets);
     event LogEndSale(address owner, uint balance, uint eventId);
@@ -37,11 +36,12 @@ contract EventManagement {
         _;
     }
 
-    function addEvent(string memory description, string memory url, uint ticketsAvailable) public isOwner returns (uint) {
+    function addEvent(string memory title, string memory description, uint price, uint ticketsAvailable) public isOwner returns (uint) {
         Event memory evt;
 
+        evt.title = title;
         evt.description = description;
-        evt.website = url;
+        evt.ticketPrice = price;
         evt.ticketsAvailable = ticketsAvailable;
         evt.isOpen = true;
 
@@ -49,7 +49,7 @@ contract EventManagement {
         events[idGenerator] = evt;
         idGenerator++;
 
-        emit LogEventAdded(description, url, ticketsAvailable, eventId);
+        emit LogEventAdded(title, description, price, ticketsAvailable, eventId);
 
         return eventId;
     }
@@ -57,9 +57,10 @@ contract EventManagement {
     function readEvent(uint eventId)
       public
       view
-      returns(string memory description, string memory url, uint ticketsAvailable, uint sales, bool isOpen) {
+      returns(string memory title, string memory description, uint ticketPrice, uint ticketsAvailable, uint sales, bool isOpen) {
+        title = events[eventId].title;
         description = events[eventId].description;
-        url = events[eventId].website;
+        ticketPrice = events[eventId].ticketPrice;
         ticketsAvailable = events[eventId].ticketsAvailable;
         sales = events[eventId].sales;
         isOpen = events[eventId].isOpen;
@@ -71,14 +72,14 @@ contract EventManagement {
       payable
     {
         require(events[eventId].isOpen == true);
-        require(msg.value >= PRICE_TICKET*noOfTickets);
+        require(msg.value >= events[eventId].ticketPrice*noOfTickets);
         require(events[eventId].ticketsAvailable >= noOfTickets);
 
         events[eventId].buyers[msg.sender] += noOfTickets;
         events[eventId].ticketsAvailable -= noOfTickets;
         events[eventId].sales = noOfTickets;
 
-        uint ticketsPrice = PRICE_TICKET*noOfTickets;
+        uint ticketsPrice = events[eventId].ticketPrice*noOfTickets;
         if (msg.value > ticketsPrice) {
             msg.sender.transfer(msg.value - ticketsPrice);
         }
@@ -91,7 +92,7 @@ contract EventManagement {
         require(events[eventId].buyers[msg.sender] > 0);
 
         uint noOfTicketsToRefund = events[eventId].buyers[msg.sender];
-        uint refundAmount = PRICE_TICKET*noOfTicketsToRefund;
+        uint refundAmount = events[eventId].ticketPrice*noOfTicketsToRefund;
 
         events[eventId].sales -= noOfTicketsToRefund;
         msg.sender.transfer(refundAmount);
@@ -109,7 +110,7 @@ contract EventManagement {
     function endSale(uint eventId) public isOwner {
         events[eventId].isOpen = false;
 
-        uint amountTotal = events[eventId].sales*PRICE_TICKET;
+        uint amountTotal = events[eventId].sales*events[eventId].ticketPrice;
         owner.transfer(amountTotal);
 
         emit LogEndSale(owner, amountTotal, eventId);
