@@ -72,7 +72,6 @@ class App extends Component {
         deployedNetwork && deployedNetwork.address,
       );
 
-      console.log("Getting buffer data");
       const eventsData = await instance.methods.getEventsData().call();
       const eventIds = eventsData[FIELD_ID];
       const titlesBuffer = eventsData[FIELD_TITLE];
@@ -82,8 +81,6 @@ class App extends Component {
       const ticketsAvailabilities = eventsData[FIELD_TICKETS_AVAILABLE];
       const ticketsPrices = eventsData[FIELD_TICKET_PRICE];
       const areOpen = eventsData[FIELD_IS_OPEN];
-
-      console.log("titles ", titles);
 
       let events = {}
       for (let i = 0; i < eventIds.length; i++) {
@@ -95,8 +92,6 @@ class App extends Component {
           isOpen: areOpen[i]
         };
       }
-
-      console.log("Events: ", events);
 
       // Set state
       this.setState({
@@ -124,11 +119,33 @@ class App extends Component {
   }
 
   buyTickets(event) {
-    //TODO Sort out invalid no of tickets
     event.preventDefault();
+    if (this.state.inputNoOfTickets == 0) {
+      return;
+    }
     console.log("buyTickets noOfTickets: ", this.state.inputNoOfTickets);
-    this.setState({
-      inputNoOfTickets: ""
+    let balance = 0;
+    this.state.web3.eth.getBalance(this.state.accounts[0])
+    .then((result) => {
+      balance = result;
+    });
+
+    console.log("account balance: ", balance);
+    this.state.contract.methods.buyTickets(this.state.selectedEventId, this.state.inputNoOfTickets)
+    .send({from: this.state.accounts[0], value: 10000000000000000}) //TODO Determine value programmatically.
+    .on('receipt', (receipt) => {
+      const eventId = receipt.events.LogBuyTickets.returnValues['id'];
+      const numTickets = receipt.events.LogBuyTickets.returnValues['numTickets'];
+
+      let newEventsList = Object.assign({}, this.state.events);
+      newEventsList[eventId].ticketsAvailable -= numTickets;
+
+      this.setState({
+        inputNoOfTickets: "",
+        events: newEventsList
+      });
+
+      alert(numTickets + " ticket(s) successfully bought!");
     });
   }
 

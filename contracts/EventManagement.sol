@@ -43,6 +43,7 @@ contract EventManagement is Seriality {
         evt.description = description;
         evt.ticketPrice = price;
         evt.ticketsAvailable = ticketsAvailable;
+        evt.sales = 0;
         evt.isOpen = true;
 
         uint eventId = idGenerator;
