@@ -1,7 +1,8 @@
 pragma solidity ^0.5.0;
 
+import "./libraries/Seriality/src/Seriality.sol";
 
-contract EventManagement {
+contract EventManagement is Seriality{
 
     address payable public owner;
 
@@ -21,10 +22,10 @@ contract EventManagement {
 
     mapping (uint => Event) events;
 
-    event LogEventAdded(string title, string desc, uint ticketPrice, uint ticketsAvailable, uint eventId);
-    event LogBuyTickets(address buyer, uint eventId, uint numTickets);
-    event LogGetRefund(address accountRefunded, uint eventId, uint numTickets);
-    event LogEndSale(address owner, uint balance, uint eventId);
+    event LogEventAdded(uint id, string title, string desc, uint ticketPrice, uint ticketsAvailable);
+    event LogBuyTickets(uint id, address buyer, uint numTickets);
+    event LogGetRefund(uint id, address accountRefunded, uint numTickets);
+    event LogEndSale(uint id, address owner, uint balance);
 
     constructor() public {
         owner = msg.sender;
@@ -50,7 +51,7 @@ contract EventManagement {
         eventIds.push(eventId);
         idGenerator++;
 
-        emit LogEventAdded(title, description, price, ticketsAvailable, eventId);
+        emit LogEventAdded(eventId, title, description, price, ticketsAvailable);
 
         return eventId;
     }
@@ -85,7 +86,7 @@ contract EventManagement {
             msg.sender.transfer(msg.value - ticketsPrice);
         }
 
-        emit LogBuyTickets(msg.sender, eventId, noOfTickets);
+        emit LogBuyTickets(eventId, msg.sender, noOfTickets);
     }
 
 
@@ -99,7 +100,7 @@ contract EventManagement {
         msg.sender.transfer(refundAmount);
         events[eventId].ticketsAvailable += noOfTicketsToRefund;
 
-        emit LogGetRefund(msg.sender, eventId, noOfTicketsToRefund);
+        emit LogGetRefund(eventId, msg.sender, noOfTicketsToRefund);
     }
 
 
@@ -114,6 +115,61 @@ contract EventManagement {
         uint amountTotal = events[eventId].sales*events[eventId].ticketPrice;
         owner.transfer(amountTotal);
 
-        emit LogEndSale(owner, amountTotal, eventId);
+        emit LogEndSale(eventId, owner, amountTotal);
+    }
+
+    // Helper functions:
+    function getEventsBufferBytes()
+      public
+      view
+      returns (bytes memory, bytes memory, bytes memory, bytes memory, bytes memory)
+    {
+        //uint length = eventIds.length;
+
+        // uint titleOffset = 64*length;
+        // uint descriptionOffset = 64*length;
+        // uint ticketsAvailableOffset =4*length;
+        // uint ticketPriceOffset = 4*length;
+        // uint isOpenOffset = 1*length;
+
+        uint offset = 64*eventIds.length + 64*eventIds.length + 4*eventIds.length + 4*eventIds.length + eventIds.length;
+
+        bytes memory titleBuffer = new bytes(64*eventIds.length);
+        bytes memory descriptionBuffer = new bytes(64*eventIds.length);
+        bytes memory ticketsAvailableBuffer = new bytes(4*eventIds.length);
+        bytes memory ticketPriceBuffer = new bytes(4*eventIds.length);
+        bytes memory isOpenBuffer = new bytes(eventIds.length);
+
+        string memory titleOut = new string(32);
+        string memory descriptionOut = new string(32);
+        uint ticketsAvailableOut;
+        uint ticketPriceOut;
+        bool isOpenOut;
+
+        for (uint i = 0; i < eventIds.length; i++) {
+            titleOut = events[eventIds[i]].title;
+            descriptionOut = events[eventIds[i]].description;
+            ticketsAvailableOut = events[eventIds[i]].ticketsAvailable;
+            ticketPriceOut = events[eventIds[i]].ticketPrice;
+            isOpenOut = events[eventIds[i]].isOpen;
+
+            stringToBytes(offset, bytes(titleOut), titleBuffer);
+            offset -= sizeOfString(titleOut);
+
+            stringToBytes(offset, bytes(descriptionOut), descriptionBuffer);
+            offset -= sizeOfString(descriptionOut);
+
+            uintToBytes(offset, ticketsAvailableOut, ticketsAvailableBuffer);
+            offset -= sizeOfUint(256);
+
+            uintToBytes(offset, ticketPriceOut, ticketPriceBuffer);
+            offset -= sizeOfUint(256);
+
+            boolToBytes(offset, isOpenOut, isOpenBuffer);
+            offset -= sizeOfBool();
+        }
+
+        return (titleBuffer, descriptionBuffer, ticketsAvailableBuffer, ticketPriceBuffer, isOpenBuffer);
+
     }
 }
