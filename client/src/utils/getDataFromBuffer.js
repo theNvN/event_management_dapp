@@ -27,6 +27,7 @@ const getDataFromBuffer = (buffer) => {
   }
 
   params.pop();
+  params.reverse();
 
   return params;
 }

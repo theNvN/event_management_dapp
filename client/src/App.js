@@ -1,6 +1,7 @@
 import React, { Component } from "react";
 import EventManagementContract from "./contracts/EventManagement.json";
 import getWeb3 from "./utils/getWeb3";
+import getDataFromBuffer from "./utils/getDataFromBuffer";
 
 import "./App.css";
 
@@ -11,6 +12,13 @@ import { EventForm } from './EventForm.js';
 const VIEW_MODE_EVENTS_LIST = 'events_list';
 const VIEW_MODE_EVENT_INFO = 'event_info';
 const VIEW_MODE_EVENT_FORM = 'event_form';
+
+const FIELD_ID = 0;
+const FIELD_TITLE = 1;
+const FIELD_DESCRIPTION = 2;
+const FIELD_TICKETS_AVAILABLE = 3;
+const FIELD_TICKET_PRICE = 4;
+const FIELD_IS_OPEN = 5;
 
 class App extends Component {
 
@@ -31,15 +39,8 @@ class App extends Component {
 
       viewMode: VIEW_MODE_EVENTS_LIST,
       selectedEventId: 0,
-      events: [{
-        'id': 21,
-        'title': 'Evnet E',
-        'description': 'This is a fake event for testing. Do not disappoint yourself. Thank You!',
-        'ticketsAvailable': 25,
-        'sales': 10,
-        'ticketPrice': 500,
-        'isOpen': true
-      }]
+
+      events: {}
     };
 
     this.handleNoOfTicketsChange = this.handleNoOfTicketsChange.bind(this);
@@ -55,6 +56,7 @@ class App extends Component {
   }
 
   componentDidMount = async () => {
+    console.log("componentDidMount called.");
     try {
       // Get network provider and web3 instance.
       const web3 = await getWeb3();
@@ -70,14 +72,39 @@ class App extends Component {
         deployedNetwork && deployedNetwork.address,
       );
 
-      
+      console.log("Getting buffer data");
+      const eventsData = await instance.methods.getEventsData().call();
+      const eventIds = eventsData[FIELD_ID];
+      const titlesBuffer = eventsData[FIELD_TITLE];
+      const titles = getDataFromBuffer(titlesBuffer);
+      const descriptionsBuffer = eventsData[FIELD_DESCRIPTION];
+      const descriptions = getDataFromBuffer(descriptionsBuffer);
+      const ticketsAvailabilities = eventsData[FIELD_TICKETS_AVAILABLE];
+      const ticketsPrices = eventsData[FIELD_TICKET_PRICE];
+      const areOpen = eventsData[FIELD_IS_OPEN];
+
+      console.log("titles ", titles);
+
+      let events = {}
+      for (let i = 0; i < eventIds.length; i++) {
+        events[eventIds[i]] = {
+          title: titles[i],
+          description: descriptions[i],
+          ticketsAvailable: ticketsAvailabilities[i],
+          ticketPrice: ticketsPrices[i],
+          isOpen: areOpen[i]
+        };
+      }
+
+      console.log("Events: ", events);
 
       // Set state
       this.setState({
        web3,
        accounts,
        contract: instance,
-       loginAddress: accounts[0]
+       loginAddress: accounts[0],
+       events
       });
 
     } catch (error) {
@@ -132,36 +159,73 @@ class App extends Component {
   }
 
   handleEventTitleChange(event) {
-    console.log("handleEventTitleChange value: ", event.target.value);
+    //console.log("handleEventTitleChange value: ", event.target.value);
     this.setState({
       inputEventTitle: event.target.value
     });
   }
 
   handleEventTicketsCountChange(event) {
-    console.log("handleEventTicketsCountChange value: ", event.target.value);
+    //console.log("handleEventTicketsCountChange value: ", event.target.value);
     this.setState({
       inputEventTicketsCount: event.target.value
     });
   }
 
   handleEventTicketPriceChange(event) {
-    console.log("handleEventTicketPriceChange value: ", event.target.value);
+    //console.log("handleEventTicketPriceChange value: ", event.target.value);
     this.setState({
       inputEventTicketPrice: event.target.value
     });
   }
 
   handleEventDescriptionChange(event) {
-    console.log("handleEventDescriptionChange value: ", event.target.value);
+    //console.log("handleEventDescriptionChange value: ", event.target.value);
     this.setState({
-      inputEventDescription: event.target.description
+      inputEventDescription: event.target.value
     });
   }
 
-  addEvent(event) {
-    event.preventDefault();
+  addEvent = async(event) => {
     console.log("addEvent");
+    event.preventDefault();
+    //console.log("description: ", this.state.inputEventDescription);
+    await this.state.contract.methods.addEvent(
+      this.state.inputEventTitle,
+      this.state.inputEventDescription,
+      this.state.inputEventTicketPrice,
+      this.state.inputEventTicketsCount
+    ).send({from: this.state.accounts[0]})
+    .on('receipt', (receipt) => {
+      //console.log("receit", receit);
+      const id = receipt.events.LogEventAdded.returnValues['id'];
+      const title = receipt.events.LogEventAdded.returnValues['title'];
+      const description = receipt.events.LogEventAdded.returnValues['desc'];
+      const ticketPrice = receipt.events.LogEventAdded.returnValues['ticketPrice'];
+      const ticketsAvailable = receipt.events.LogEventAdded.returnValues['ticketsAvailable'];
+      const isOpen = true; // by default
+
+      console.log("EventInfo: ", id + ", " + title + ", " + description + ", " + ticketPrice + ", " + ticketsAvailable + ", " + isOpen);
+      let newEventsList = Object.assign({}, this.state.events);
+      newEventsList[id] = {
+        title: title,
+        description: description,
+        ticketPrice: ticketPrice,
+        ticketsAvailable: ticketsAvailable,
+        isOpen: isOpen
+      };
+
+      this.setState({
+        events: newEventsList
+      });
+
+      this.goBackToEvents();
+
+      alert("Event Added!");
+    })
+    .on('error', (error) => {
+      console.log("Error occurred: ", error);
+    })
   }
 
 
@@ -181,7 +245,7 @@ class App extends Component {
     } else if (this.state.viewMode == VIEW_MODE_EVENT_INFO) {
       renderComponent = (
         <EventInfo
-          event={this.state.events[0] /*this.state.selectedEventId must be passed*/}
+          event={this.state.events[this.state.selectedEventId]}
           handleNoOfTicketsChange={this.handleNoOfTicketsChange}
           buyTickets={this.buyTickets}
           goBackToEvents={this.goBackToEvents}/>

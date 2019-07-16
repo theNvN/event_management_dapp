@@ -2,7 +2,7 @@ pragma solidity ^0.5.0;
 
 import "./libraries/Seriality/src/Seriality.sol";
 
-contract EventManagement is Seriality{
+contract EventManagement is Seriality {
 
     address payable public owner;
 
@@ -46,7 +46,7 @@ contract EventManagement is Seriality{
         evt.isOpen = true;
 
         uint eventId = idGenerator;
-        events[idGenerator] = evt;
+        events[eventId] = evt;
 
         eventIds.push(eventId);
         idGenerator++;
@@ -119,57 +119,127 @@ contract EventManagement is Seriality{
     }
 
     // Helper functions:
-    function getEventsBufferBytes()
+    function getEventsData()
       public
       view
-      returns (bytes memory, bytes memory, bytes memory, bytes memory, bytes memory)
+      returns (uint[] memory ids, bytes memory titlesBuffer, bytes memory descriptionsBuffer, uint[] memory ticketsAvailable,
+      uint[] memory ticketsPrices, bool[] memory areOpen)
     {
-        //uint length = eventIds.length;
+        titlesBuffer = getEventsTitlesBuffer();
+        descriptionsBuffer = getEventsDescriptionsBuffer();
 
-        // uint titleOffset = 64*length;
-        // uint descriptionOffset = 64*length;
-        // uint ticketsAvailableOffset =4*length;
-        // uint ticketPriceOffset = 4*length;
-        // uint isOpenOffset = 1*length;
-
-        uint offset = 64*eventIds.length + 64*eventIds.length + 4*eventIds.length + 4*eventIds.length + eventIds.length;
-
-        bytes memory titleBuffer = new bytes(64*eventIds.length);
-        bytes memory descriptionBuffer = new bytes(64*eventIds.length);
-        bytes memory ticketsAvailableBuffer = new bytes(4*eventIds.length);
-        bytes memory ticketPriceBuffer = new bytes(4*eventIds.length);
-        bytes memory isOpenBuffer = new bytes(eventIds.length);
-
-        string memory titleOut = new string(32);
-        string memory descriptionOut = new string(32);
-        uint ticketsAvailableOut;
-        uint ticketPriceOut;
-        bool isOpenOut;
+        ids = new uint[](eventIds.length);
+        ticketsAvailable = new uint[](eventIds.length);
+        ticketsPrices = new uint[](eventIds.length);
+        areOpen = new bool[](eventIds.length);
 
         for (uint i = 0; i < eventIds.length; i++) {
-            titleOut = events[eventIds[i]].title;
-            descriptionOut = events[eventIds[i]].description;
-            ticketsAvailableOut = events[eventIds[i]].ticketsAvailable;
-            ticketPriceOut = events[eventIds[i]].ticketPrice;
-            isOpenOut = events[eventIds[i]].isOpen;
-
-            stringToBytes(offset, bytes(titleOut), titleBuffer);
-            offset -= sizeOfString(titleOut);
-
-            stringToBytes(offset, bytes(descriptionOut), descriptionBuffer);
-            offset -= sizeOfString(descriptionOut);
-
-            uintToBytes(offset, ticketsAvailableOut, ticketsAvailableBuffer);
-            offset -= sizeOfUint(256);
-
-            uintToBytes(offset, ticketPriceOut, ticketPriceBuffer);
-            offset -= sizeOfUint(256);
-
-            boolToBytes(offset, isOpenOut, isOpenBuffer);
-            offset -= sizeOfBool();
+            ids[i] = eventIds[i];
+            ticketsAvailable[i] = events[eventIds[i]].ticketsAvailable;
+            ticketsPrices[i] = events[eventIds[i]].ticketPrice;
+            areOpen[i] = events[eventIds[i]].isOpen;
         }
-
-        return (titleBuffer, descriptionBuffer, ticketsAvailableBuffer, ticketPriceBuffer, isOpenBuffer);
-
     }
+
+    function getEventIds()
+      public
+      view
+      returns (uint[] memory)
+    {
+      return eventIds;
+    }
+
+    function getEventsTitlesBuffer()
+      public
+      view
+      returns(bytes memory)
+    {
+      uint offset = 64*eventIds.length;
+
+      bytes memory buffer = new bytes(offset);
+      string memory out = new string(32);
+
+      for (uint i = 0; i < eventIds.length; i++) {
+        out = events[eventIds[i]].title;
+
+        stringToBytes(offset, bytes(out), buffer);
+        offset -= sizeOfString(out);
+      }
+
+      return buffer;
+    }
+
+    function getEventsDescriptionsBuffer()
+      public
+      view
+      returns(bytes memory)
+    {
+      uint offset = 64*eventIds.length;
+
+      bytes memory buffer = new bytes(offset);
+      string memory out = new string(32);
+
+      for (uint i = 0; i < eventIds.length; i++) {
+        out = events[eventIds[i]].description;
+
+        stringToBytes(offset, bytes(out), buffer);
+        offset -= sizeOfString(out);
+      }
+
+      return buffer;
+    }
+
+    // function getEventsBufferBytes()
+    //   public
+    //   view
+    //   returns (bytes memory, bytes memory, bytes memory, bytes memory, bytes memory)
+    // {
+    //     //uint length = eventIds.length;
+
+    //     // uint titleOffset = 64*length;
+    //     // uint descriptionOffset = 64*length;
+    //     // uint ticketsAvailableOffset =4*length;
+    //     // uint ticketPriceOffset = 4*length;
+    //     // uint isOpenOffset = 1*length;
+
+    //     uint offset = 64*eventIds.length + 64*eventIds.length + 4*eventIds.length + 4*eventIds.length + eventIds.length;
+
+    //     bytes memory titleBuffer = new bytes(64*eventIds.length);
+    //     bytes memory descriptionBuffer = new bytes(64*eventIds.length);
+    //     bytes memory ticketsAvailableBuffer = new bytes(4*eventIds.length);
+    //     bytes memory ticketPriceBuffer = new bytes(4*eventIds.length);
+    //     bytes memory isOpenBuffer = new bytes(eventIds.length);
+
+    //     string memory titleOut = new string(32);
+    //     string memory descriptionOut = new string(32);
+    //     uint ticketsAvailableOut;
+    //     uint ticketPriceOut;
+    //     bool isOpenOut;
+
+    //     for (uint i = 0; i < eventIds.length; i++) {
+    //         titleOut = events[eventIds[i]].title;
+    //         descriptionOut = events[eventIds[i]].description;
+    //         ticketsAvailableOut = events[eventIds[i]].ticketsAvailable;
+    //         ticketPriceOut = events[eventIds[i]].ticketPrice;
+    //         isOpenOut = events[eventIds[i]].isOpen;
+
+    //         stringToBytes(offset, bytes(titleOut), titleBuffer);
+    //         offset -= sizeOfString(titleOut);
+
+    //         stringToBytes(offset, bytes(descriptionOut), descriptionBuffer);
+    //         offset -= sizeOfString(descriptionOut);
+
+    //         uintToBytes(offset, ticketsAvailableOut, ticketsAvailableBuffer);
+    //         offset -= sizeOfUint(256);
+
+    //         uintToBytes(offset, ticketPriceOut, ticketPriceBuffer);
+    //         offset -= sizeOfUint(256);
+
+    //         boolToBytes(offset, isOpenOut, isOpenBuffer);
+    //         offset -= sizeOfBool();
+    //     }
+
+    //     return (titleBuffer, descriptionBuffer, ticketsAvailableBuffer, ticketPriceBuffer, isOpenBuffer);
+
+    // }
 }

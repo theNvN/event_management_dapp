@@ -4,10 +4,28 @@ import './Events.css';
 export class Events extends Component {
   constructor(props) {
     super(props);
+
+    this.getEventsArray = this.getEventsArray.bind(this);
+  }
+
+  getEventsArray() {
+    if (this.props.eventsList == undefined) {
+      return [];
+    }
+
+    return Object.keys(this.props.eventsList).map((key) => {
+      return {
+        id: key,
+        title: this.props.eventsList[key]['title'],
+        ticketPrice: this.props.eventsList[key]['ticketPrice'],
+        ticketsAvailable: this.props.eventsList[key]['ticketsAvailable'],
+        isOpen: this.props.eventsList[key]['isOpen']
+      };
+    });
   }
 
   render() {
-    const events = this.props.eventsList.map((event) => {
+    const events = this.getEventsArray().map((event) => {
       return (
         <div className="event" key={event.id}>
           <div id={event.id} className="upper" onClick={this.props.showEventInfo}>
