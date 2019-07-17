@@ -8,10 +8,12 @@ import "./App.css";
 import { Events } from './Events.js';
 import { EventInfo } from './EventInfo.js';
 import { EventForm } from './EventForm.js';
+import { UserEvents } from './UserEvents.js'
 
 const VIEW_MODE_EVENTS_LIST = 'events_list';
 const VIEW_MODE_EVENT_INFO = 'event_info';
 const VIEW_MODE_EVENT_FORM = 'event_form';
+const VIEW_MODE_EVENT_USER = 'event_user';
 
 const FIELD_ID = 0;
 const FIELD_TITLE = 1;
@@ -42,7 +44,14 @@ class App extends Component {
       viewMode: VIEW_MODE_EVENTS_LIST,
       selectedEventId: 0,
 
-      events: {}
+      events: {},
+      participatedEvents: [{
+        'id': 21,
+        'title': 'Evnet E',
+        'description': 'This is a fake event for testing. Do not disappoint yourself. Thank You!',
+        'ticketPurchaseCount': 10,
+        'isOpen': true
+      }]
     };
 
     this.handleNoOfTicketsChange = this.handleNoOfTicketsChange.bind(this);
@@ -55,6 +64,7 @@ class App extends Component {
     this.handleEventTicketPriceChange = this.handleEventTicketPriceChange.bind(this);
     this.handleEventDescriptionChange = this.handleEventDescriptionChange.bind(this);
     this.addEvent = this.addEvent.bind(this);
+    this.showUserEvents = this.showUserEvents.bind(this);
   }
 
   componentDidMount = async () => {
@@ -264,6 +274,12 @@ class App extends Component {
     })
   }
 
+  showUserEvents() {
+    console.log("showUserEvents");
+    this.setState({
+      viewMode: VIEW_MODE_EVENT_USER
+    });
+  }
 
   render() {
     if (!this.state.web3) {
@@ -276,7 +292,8 @@ class App extends Component {
         <Events
           eventsList={this.state.events}
           showEventInfo={this.showEventInfo}
-          showAddEventForm={this.showAddEventForm}/>
+          showAddEventForm={this.showAddEventForm}
+          showUserEvents={this.showUserEvents}/>
       );
     } else if (this.state.viewMode == VIEW_MODE_EVENT_INFO) {
       renderComponent = (
@@ -286,7 +303,7 @@ class App extends Component {
           buyTickets={this.buyTickets}
           goBackToEvents={this.goBackToEvents}/>
       );
-    } else {
+    } else if (this.state.viewMode == VIEW_MODE_EVENT_FORM) {
       renderComponent = (
         <EventForm
           inputEventTitle={this.state.inputEventTitle}
@@ -300,6 +317,12 @@ class App extends Component {
           addEvent={this.addEvent}
           goBackToEvents={this.goBackToEvents}/>
       );
+    } else {
+      renderComponent = (
+        <UserEvents
+          participatedEvents={this.state.participatedEvents}
+          goBackToEvents={this.goBackToEvents}/>
+      )
     }
 
     return (

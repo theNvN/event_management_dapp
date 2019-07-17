@@ -115,7 +115,10 @@ contract EventManagement is Seriality {
     }
 
 
-    function endSale(uint eventId) public isOwner {
+    function endSale(uint eventId)
+      public
+      isOwner
+    {
         events[eventId].isOpen = false;
 
         uint amountTotal = events[eventId].sales*events[eventId].ticketPrice;

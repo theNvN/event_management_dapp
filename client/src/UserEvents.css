@@ -1,12 +1,31 @@
-.eventsWrapper {
-  width: 90%;
+.userEventsContainer {
   display: flex;
   flex-direction: column;
-  margin-top: 20px;
   align-items: center;
+  width: 95%;
+  margin-top: 20px;
+  background: #f2f2f2;
+  border-radius: 20px;
+  padding: 10px;
 }
 
-.eventsList {
+#goBackToEvents {
+  align-self: flex-start;
+  font-weight: bold;
+  font-size: 1.1em;
+  padding: 5px;
+  background: #fff;
+  border: solid black 2px;
+  border-radius: 20px;
+  cursor: pointer;
+}
+
+#participatedEventsLabel {
+  font-size: 2em;
+  font-weight: bold;
+}
+
+#participatedEventsList {
   display: grid;
   grid-template-columns: auto auto auto;
   width: 98%;
@@ -15,40 +34,7 @@
   border-radius: 10px;
 }
 
-#eventsListHeader {
-  width: 99%;
-  height: 100px;
-  display: flex;
-  flex-direction: row;
-  justify-content: space-between;
-  margin-bottom: 5px;
-}
-
-#showUserEventsBtn {
-  border: solid black 1px;
-  border-radius: 10px;
-  cursor: pointer;
-  font-weight: bold;
-  align-self: flex-start;
-  padding: 5px 10px;
-}
-
-#showAddEventFormBtn {
-  border: solid black 2px;
-  border-radius: 20px;
-  cursor: pointer;
-  font-weight: bold;
-  align-self: flex-end;
-}
-
-#eventsListLabel {
-  text-align: center;
-  font-size: 2em;
-  font-weight: bold;
-  align-self: flex-end;
-}
-
-.event {
+.userEvent {
   width: 450px;
   display: flex;
   flex-direction: column;
@@ -57,7 +43,7 @@
   border-radius: 10px;
 }
 
-.event:hover {
+.userEvent:hover {
    box-shadow: 1px 1px 10px;
 }
 
@@ -72,12 +58,12 @@
   align-items: center;
 }
 
-.eventId {
+.userEventId {
   align-self: flex-start;
   font-size: 0.8em;
 }
 
-.isEventOpen {
+.isUserEventOpen {
   font-weight: bold;
 }
 
@@ -89,11 +75,7 @@
   align-items: center;
 }
 
-.eventTitle {
+.userEventTitle {
   font-size: 1.2em;
   font-weight: bold;
-}
-
-.buyTicketBtn {
-  margin: 10px 20px;
 }

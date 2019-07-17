@@ -45,6 +45,7 @@ export class Events extends Component {
       <div className="eventsWrapper">
         <div id="eventsListHeader">
           <div id="eventsListLabel">EVENTS</div>
+          <button id="showUserEventsBtn" onClick={this.props.showUserEvents}>Your Events</button>
           <button id="showAddEventFormBtn" onClick={this.props.showAddEventForm}>Add Your Event></button>
         </div>
         <div className="eventsList">
