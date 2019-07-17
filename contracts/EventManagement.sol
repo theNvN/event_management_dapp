@@ -36,7 +36,11 @@ contract EventManagement is Seriality {
         _;
     }
 
-    function addEvent(string memory title, string memory description, uint price, uint ticketsAvailable) public isOwner returns (uint) {
+    function addEvent(string memory title, string memory description, uint price, uint ticketsAvailable)
+      public
+      isOwner
+      returns (uint)
+    {
         Event memory evt;
 
         evt.title = title;
@@ -60,7 +64,8 @@ contract EventManagement is Seriality {
     function readEvent(uint eventId)
       public
       view
-      returns(string memory title, string memory description, uint ticketPrice, uint ticketsAvailable, uint sales, bool isOpen) {
+      returns(string memory title, string memory description, uint ticketPrice, uint ticketsAvailable, uint sales, bool isOpen)
+    {
         title = events[eventId].title;
         description = events[eventId].description;
         ticketPrice = events[eventId].ticketPrice;
@@ -140,6 +145,36 @@ contract EventManagement is Seriality {
             ticketsPrices[i] = events[eventIds[i]].ticketPrice;
             areOpen[i] = events[eventIds[i]].isOpen;
         }
+    }
+
+    function getBuyerPurchases()
+      public
+      view
+      returns(uint[] memory purchasedEventIds)
+    {
+       uint count = getBuyerEventPurchaseCount();
+       purchasedEventIds = new uint[](count);
+
+       for (uint i = 0; i < eventIds.length; i++) {
+           if (events[eventIds[i]].buyers[msg.sender] != 0) {
+               purchasedEventIds[i] = eventIds[i];
+           }
+       }
+    }
+
+    function getBuyerEventPurchaseCount()
+      public
+      view
+      returns (uint)
+    {
+        uint count = 0;
+        for (uint i = 0; i < eventIds.length; i++) {
+            if (events[eventIds[i]].buyers[msg.sender] != 0) {
+                count += 1;
+            }
+        }
+
+        return count;
     }
 
     function getEventIds()
