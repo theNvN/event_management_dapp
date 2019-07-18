@@ -1,11 +1,23 @@
 import React, { Component } from "react";
 import './UserEvents.css';
 
+const styleOpen = {color: '#008000'};
+const styleClosed = {color: '#ff3300'};
+
 export class UserEvents extends React.Component {
   constructor(props) {
     super(props);
 
     this.getParticipatedEventsArray = this.getParticipatedEventsArray.bind(this);
+    this.getEventStatusStyle = this.getEventStatusStyle.bind(this);
+  }
+
+  getEventStatusStyle(isOpen) {
+    if (isOpen) {
+      return styleOpen;
+    }
+
+    return styleClosed;
   }
 
   getParticipatedEventsArray() {
@@ -26,7 +38,7 @@ export class UserEvents extends React.Component {
         <div className="userEvent" key={event.id}>
           <div className="upper">
             <div className="userEventId">Event Id: {event.id}</div>
-            <div className="isUserEventOpen">{event.isOpen ? "OPEN" : "CLOSED"}</div>
+            <div className="isUserEventOpen" style={this.getEventStatusStyle(event.isOpen)}>{event.isOpen ? "OPEN" : "CLOSED"}</div>
           </div>
           <div className="lower">
             <div className="userEventTitle">{event.title}</div>
