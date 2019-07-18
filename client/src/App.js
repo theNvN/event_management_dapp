@@ -63,6 +63,7 @@ class App extends Component {
     this.handleEventDescriptionChange = this.handleEventDescriptionChange.bind(this);
     this.addEvent = this.addEvent.bind(this);
     this.showUserEvents = this.showUserEvents.bind(this);
+    this.endSale = this.endSale.bind(this);
   }
 
   componentDidMount = async () => {
@@ -117,8 +118,8 @@ class App extends Component {
         events[eventIds[i]] = {
           title: titles[i],
           description: descriptions[i],
-          ticketsAvailable: ticketsAvailabilities[i],
-          ticketPrice: ticketsPrices[i],
+          ticketsAvailable: (areOpen[i] ? ticketsAvailabilities[i] : 0),
+          ticketPrice: (areOpen[i] ? ticketsPrices[i] : "-"),
           isOpen: areOpen[i]
         };
       }
@@ -186,12 +187,17 @@ class App extends Component {
       let newEventsList = Object.assign({}, this.state.events);
       newEventsList[eventId].ticketsAvailable -= numTickets;
 
+      let initialPurchaseCount = 0;
+      if (this.state.participatedEvents[eventId] != undefined) {
+        initialPurchaseCount = this.state.participatedEvents[eventId].ticketPurchaseCount;
+      }
+
       let newUserEventsList = Object.assign({}, this.state.participatedEvents);
       newUserEventsList[eventId] = {
         title: this.state.events[eventId].title,
         description: this.state.events[eventId].description,
         isOpen: this.state.events[eventId].isOpen,
-        ticketPurchaseCount: numTickets
+        ticketPurchaseCount: Number(numTickets) + Number(initialPurchaseCount)
       };
 
       this.setState({
@@ -267,7 +273,7 @@ class App extends Component {
       this.state.inputEventDescription,
       this.state.inputEventTicketPrice,
       this.state.inputEventTicketsCount
-    ).send({from: this.state.accounts[0]})
+    ).send({from: this.state.loginAddress})
     .on('receipt', (receipt) => {
       //console.log("receit", receit);
       const id = receipt.events.LogEventAdded.returnValues['id'];
@@ -300,6 +306,51 @@ class App extends Component {
     })
   }
 
+  endSale = async(event) => {
+    console.log("endSale id:", event.target.value);
+    this.state.contract.methods.endSale(event.target.value)
+    .send({from: this.state.loginAddress})
+    .on('receipt', (receipt) => {
+      const eventId = receipt.events.LogEndSale.returnValues['id'];
+      const amountTotal = receipt.events.LogEndSale.returnValues['balance'];
+
+      console.log("eventId amountTotal: ", eventId + ", " + amountTotal);
+
+      let newEventsList = Object.assign({}, this.state.events);
+      newEventsList[eventId] = {
+        title: newEventsList[eventId].title,
+        description: newEventsList[eventId].description,
+        ticketPrice: "-",
+        ticketsAvailable: 0,
+        isOpen: false
+      };
+
+      let newUserEventsList = Object.assign({}, this.state.participatedEvents);
+
+      if (newUserEventsList[eventId] != undefined) {
+        newUserEventsList[eventId] = {
+          title: newUserEventsList[eventId].title,
+          description: newUserEventsList[eventId].description,
+          isOpen: false,
+          ticketPurchaseCount: newUserEventsList[eventId].ticketPurchaseCount
+        };
+    }
+
+      this.setState({
+        events: newEventsList,
+        participatedEvents: newUserEventsList
+      });
+
+      this.goBackToEvents();
+
+      alert("Event sale closed!");
+
+    })
+    .on('error', (error) => {
+      console.log("Error occurred: ", error);
+    });
+  }
+
   showUserEvents() {
     console.log("showUserEvents");
     this.setState({
@@ -325,9 +376,12 @@ class App extends Component {
     } else if (this.state.viewMode == VIEW_MODE_EVENT_INFO) {
       renderComponent = (
         <EventInfo
+          selectedEventId={this.state.selectedEventId}
           event={this.state.events[this.state.selectedEventId]}
+          isLoginAddressOwner={this.state.owner == this.state.loginAddress}
           handleNoOfTicketsChange={this.handleNoOfTicketsChange}
           buyTickets={this.buyTickets}
+          endSale={this.endSale}
           goBackToEvents={this.goBackToEvents}/>
       );
     } else if (this.state.viewMode == VIEW_MODE_EVENT_FORM) {

@@ -24,6 +24,13 @@ export class EventInfo extends Component {
             <input type="submit" value="Buy" onClick={this.props.buyTickets} disabled={!this.props.event.isOpen}/>
           </form>
         </div>
+        {this.props.isLoginAddressOwner ?
+        <button id="endSaleBtn" onClick={this.props.endSale} value={this.props.selectedEventId} disabled={!this.props.event.isOpen}>
+          CLOSE EVENT & WITHDRAW AMOUNT
+        </button>
+        :
+        ""
+      }
       </div>
     );
   }
