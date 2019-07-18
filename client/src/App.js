@@ -36,6 +36,7 @@ class App extends Component {
       contract: null,
 
       loginAddress: "0x0000000000000000000000000000000000000000",
+      owner: "0x0000000000000000000000000000000000000000",
       loginAddressBalance: 0,
       gasPrice: 0,
       inputNoOfTickets: "",
@@ -81,6 +82,9 @@ class App extends Component {
         deployedNetwork && deployedNetwork.address,
       );
 
+      const owner = await instance.methods.owner().call();
+      console.log("accounts, owner", accounts + ", " + owner);
+
       // Get balance of logged in account
       web3.eth.getBalance(accounts[0])
       .then((balance) => {
@@ -120,7 +124,7 @@ class App extends Component {
       }
 
       console.log("Getting user tickets data");
-      const buyerTicketsData = await instance.methods.getBuyerPurchases().call();
+      const buyerTicketsData = await instance.methods.getBuyerPurchases().call({from: accounts[0]});
       const userEventIds = buyerTicketsData[FIELD_USER_EVENT_ID];
       const userEventTicketCounts = buyerTicketsData[FIELD_USER_EVENT_TICKET_COUNT];
 
@@ -142,6 +146,7 @@ class App extends Component {
        web3,
        accounts,
        contract: instance,
+       owner,
        loginAddress: accounts[0],
        events,
        participatedEvents: userEvents
@@ -163,18 +168,14 @@ class App extends Component {
     });
   }
 
-  buyTickets(event) {
+  buyTickets = async(event) => {
     event.preventDefault();
     if (this.state.inputNoOfTickets == 0) {
       return;
     }
-    // console.log("buyTickets noOfTickets: ", this.state.inputNoOfTickets);
-    // console.log("ticketPrice: ", this.state.events[this.state.selectedEventId].ticketPrice);
-    // console.log("noOfTickets: ", this.state.inputNoOfTickets);
 
     let estimatedValue =  2*this.state.gasPrice +
       this.state.events[this.state.selectedEventId].ticketPrice*this.state.inputNoOfTickets;
-    // console.log("estimatedValue: ", estimatedValue);
 
     this.state.contract.methods.buyTickets(this.state.selectedEventId, this.state.inputNoOfTickets)
     .send({from: this.state.accounts[0], value: estimatedValue})
@@ -261,7 +262,7 @@ class App extends Component {
     console.log("addEvent");
     event.preventDefault();
     //console.log("description: ", this.state.inputEventDescription);
-    await this.state.contract.methods.addEvent(
+    this.state.contract.methods.addEvent(
       this.state.inputEventTitle,
       this.state.inputEventDescription,
       this.state.inputEventTicketPrice,
@@ -316,6 +317,7 @@ class App extends Component {
       renderComponent = (
         <Events
           eventsList={this.state.events}
+          isLoginAddressOwner={this.state.owner == this.state.loginAddress}
           showEventInfo={this.showEventInfo}
           showAddEventForm={this.showAddEventForm}
           showUserEvents={this.showUserEvents}/>

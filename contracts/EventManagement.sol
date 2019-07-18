@@ -96,7 +96,9 @@ contract EventManagement is Seriality {
     }
 
 
-    function getRefund(uint eventId) public {
+    function getRefund(uint eventId)
+      public
+    {
         require(events[eventId].buyers[msg.sender] > 0);
 
         uint noOfTicketsToRefund = events[eventId].buyers[msg.sender];
@@ -110,7 +112,11 @@ contract EventManagement is Seriality {
     }
 
 
-    function getBuyerNumberTickets(uint eventId) public view returns (uint) {
+    function getBuyerNumberTickets(uint eventId)
+      public
+      view
+      returns (uint)
+    {
         return events[eventId].buyers[msg.sender];
     }
 

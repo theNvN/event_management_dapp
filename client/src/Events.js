@@ -46,7 +46,7 @@ export class Events extends Component {
         <div id="eventsListHeader">
           <div id="eventsListLabel">EVENTS</div>
           <button id="showUserEventsBtn" onClick={this.props.showUserEvents}>Your Events</button>
-          <button id="showAddEventFormBtn" onClick={this.props.showAddEventForm}>Add Your Event></button>
+          <button id="showAddEventFormBtn" onClick={this.props.showAddEventForm} disabled={!this.props.isLoginAddressOwner}>Add Event></button>
         </div>
         <div className="eventsList">
           {events}
