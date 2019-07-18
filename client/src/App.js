@@ -22,6 +22,9 @@ const FIELD_TICKETS_AVAILABLE = 3;
 const FIELD_TICKET_PRICE = 4;
 const FIELD_IS_OPEN = 5;
 
+const FIELD_USER_EVENT_ID = 0;
+const FIELD_USER_EVENT_TICKET_COUNT = 1;
+
 class App extends Component {
 
   constructor(props) {
@@ -45,13 +48,7 @@ class App extends Component {
       selectedEventId: 0,
 
       events: {},
-      participatedEvents: [{
-        'id': 21,
-        'title': 'Evnet E',
-        'description': 'This is a fake event for testing. Do not disappoint yourself. Thank You!',
-        'ticketPurchaseCount': 10,
-        'isOpen': true
-      }]
+      participatedEvents: {}
     };
 
     this.handleNoOfTicketsChange = this.handleNoOfTicketsChange.bind(this);
@@ -111,7 +108,7 @@ class App extends Component {
       const ticketsPrices = eventsData[FIELD_TICKET_PRICE];
       const areOpen = eventsData[FIELD_IS_OPEN];
 
-      let events = {}
+      let events = {};
       for (let i = 0; i < eventIds.length; i++) {
         events[eventIds[i]] = {
           title: titles[i],
@@ -122,13 +119,32 @@ class App extends Component {
         };
       }
 
+      console.log("Getting user tickets data");
+      const buyerTicketsData = await instance.methods.getBuyerPurchases().call();
+      const userEventIds = buyerTicketsData[FIELD_USER_EVENT_ID];
+      const userEventTicketCounts = buyerTicketsData[FIELD_USER_EVENT_TICKET_COUNT];
+
+      let userEvents = {};
+      for (let i = 0; i < userEventIds.length; i++) {
+        const event = events[userEventIds[i]];
+        userEvents[userEventIds[i]] = {
+          title: event.title,
+          description: event.description,
+          isOpen: event.isOpen,
+          ticketPurchaseCount: userEventTicketCounts[i]
+        };
+      }
+
+      console.log("Setting state");
+
       // Set state
       this.setState({
        web3,
        accounts,
        contract: instance,
        loginAddress: accounts[0],
-       events
+       events,
+       participatedEvents: userEvents
       });
 
     } catch (error) {
@@ -161,7 +177,7 @@ class App extends Component {
     // console.log("estimatedValue: ", estimatedValue);
 
     this.state.contract.methods.buyTickets(this.state.selectedEventId, this.state.inputNoOfTickets)
-    .send({from: this.state.accounts[0], value: estimatedValue}) //TODO Determine value programmatically.
+    .send({from: this.state.accounts[0], value: estimatedValue})
     .on('receipt', (receipt) => {
       const eventId = receipt.events.LogBuyTickets.returnValues['id'];
       const numTickets = receipt.events.LogBuyTickets.returnValues['numTickets'];
@@ -169,8 +185,17 @@ class App extends Component {
       let newEventsList = Object.assign({}, this.state.events);
       newEventsList[eventId].ticketsAvailable -= numTickets;
 
+      let newUserEventsList = Object.assign({}, this.state.participatedEvents);
+      newUserEventsList[eventId] = {
+        title: this.state.events[eventId].title,
+        description: this.state.events[eventId].description,
+        isOpen: this.state.events[eventId].isOpen,
+        ticketPurchaseCount: numTickets
+      };
+
       this.setState({
         events: newEventsList,
+        participatedEvents: newUserEventsList,
         inputNoOfTickets: ""
       });
 
@@ -322,7 +347,7 @@ class App extends Component {
         <UserEvents
           participatedEvents={this.state.participatedEvents}
           goBackToEvents={this.goBackToEvents}/>
-      )
+      );
     }
 
     return (

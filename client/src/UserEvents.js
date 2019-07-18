@@ -4,10 +4,24 @@ import './UserEvents.css';
 export class UserEvents extends React.Component {
   constructor(props) {
     super(props);
+
+    this.getParticipatedEventsArray = this.getParticipatedEventsArray.bind(this);
+  }
+
+  getParticipatedEventsArray() {
+    return Object.keys(this.props.participatedEvents).map((key) => {
+      return {
+        id: key,
+        title: this.props.participatedEvents[key]['title'],
+        description: this.props.participatedEvents[key]['description'],
+        isOpen: this.props.participatedEvents[key]['isOpen'],
+        ticketPurchaseCount: this.props.participatedEvents[key]['ticketPurchaseCount']
+      };
+    });
   }
 
   render() {
-    const participatedEvents = this.props.participatedEvents.map((event) => {
+    const participatedEvents = this.getParticipatedEventsArray().map((event) => {
       return (
         <div className="userEvent" key={event.id}>
           <div className="upper">

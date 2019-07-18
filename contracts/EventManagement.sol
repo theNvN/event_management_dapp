@@ -153,14 +153,16 @@ contract EventManagement is Seriality {
     function getBuyerPurchases()
       public
       view
-      returns(uint[] memory purchasedEventIds)
+      returns(uint[] memory purchasedEventIds, uint[] memory ticketCounts)
     {
-       uint count = getBuyerEventPurchaseCount();
-       purchasedEventIds = new uint[](count);
+       uint eventCount = getBuyerEventPurchaseCount();
+       purchasedEventIds = new uint[](eventCount);
+       ticketCounts = new uint[](eventCount);
 
        for (uint i = 0; i < eventIds.length; i++) {
            if (events[eventIds[i]].buyers[msg.sender] != 0) {
                purchasedEventIds[i] = eventIds[i];
+               ticketCounts[i] = events[eventIds[i]].buyers[msg.sender];
            }
        }
     }
