@@ -140,11 +140,11 @@ contract EventManagement is Seriality {
       public
       view
       returns (uint[] memory ids, bytes memory titlesBuffer, bytes memory descriptionsBuffer, uint[] memory ticketsAvailable,
-      uint[] memory ticketsPrices, bool[] memory areOpen/*, bytes memory imagesIpfsHashesBuffer*/)
+      uint[] memory ticketsPrices, bool[] memory areOpen/*, string memory imagesIpfsHashesBuffer*/)
     {
         titlesBuffer = getEventsTitlesBuffer();
         descriptionsBuffer = getEventsDescriptionsBuffer();
-        // imagesIpfsHashesBuffer = getEventsImagesIpfsHashesBuffer();
+        // imagesIpfsHashesBuffer = events[eventIds[0]].imageIpfsHash; //getEventsImagesIpfsHashesBuffer();
 
         ids = new uint[](eventIds.length);
         ticketsAvailable = new uint[](eventIds.length);
@@ -239,7 +239,7 @@ contract EventManagement is Seriality {
       return buffer;
     }
 
-    function getEventsImagesIpfsHashesBuffer()
+    function getIpfsHashesBuffer()
       public
       view
       returns(bytes memory)
@@ -257,6 +257,14 @@ contract EventManagement is Seriality {
       }
 
       return buffer;
+    }
+
+    function getEventImageIpfsHash(uint eventId)
+      public
+      view
+      returns (string memory)
+    {
+      return events[eventId].imageIpfsHash;
     }
 
     // function getEventsBufferBytes()

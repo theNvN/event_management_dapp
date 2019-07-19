@@ -11,7 +11,12 @@ export class Events extends Component {
     this.getEventsArray = this.getEventsArray.bind(this);
     this.getEventStatusStyle = this.getEventStatusStyle.bind(this);
     this.getIpfsUrl = this.getIpfsUrl.bind(this);
+    // this.showEventInfo = this.showEventInfo.bind(this);
   }
+
+  // showEventInfo(id) {
+  //   console.log("Id fetched: ", id);
+  // }
 
   getEventStatusStyle(isOpen) {
     if (isOpen) {
@@ -22,9 +27,9 @@ export class Events extends Component {
   }
 
   getIpfsUrl(ipfsHash) {
-    // console.log("getIpfsHash ipfsHash: ", ipfsHash);
-    // return ("https://ipfs.io/ipfs/" + ipfsHash);
-    return "";
+    console.log("getIpfsHash ipfsHash: ", ipfsHash);
+    return ("https://ipfs.io/ipfs/" + ipfsHash);
+    // return "";
   }
 
   getEventsArray() {
@@ -48,7 +53,7 @@ export class Events extends Component {
     const events = this.getEventsArray().map((event) => {
       return (
         <div className="event" key={event.id}>
-          <div id={event.id} className="upper" onClick={this.props.showEventInfo}>
+          <div className="upper" onClick={(e) => this.props.showEventInfo(event.id)}>
             <img className="eventImage" src={this.getIpfsUrl(event.imageIpfsHash)} alt="event image" />
             <div className="eventId">Event Id: {event.id}</div>
             <div className="isEventOpen" style={this.getEventStatusStyle(event.isOpen)}>{event.isOpen ? "OPEN" : "CLOSED"}</div>

@@ -120,20 +120,18 @@ class App extends Component {
       const ticketsAvailabilities = eventsData[FIELD_TICKETS_AVAILABLE];
       const ticketsPrices = eventsData[FIELD_TICKET_PRICE];
       const areOpen = eventsData[FIELD_IS_OPEN];
-      // console.log("Getting ipfs hashes");
-      // const imagesIpfsHashesBuffer = eventsData[FIELD_IMAGE_IPFS_HASH];
-      // const imagesIpfsHashes = getDataFromBuffer(imagesIpfsHashesBuffer);
-      // console.log("imageIpfsHashes: ", imagesIpfsHashes);
 
       let events = {};
       for (let i = 0; i < eventIds.length; i++) {
+        const ipfsHash = await instance.methods.getEventImageIpfsHash(i).call();
+
         events[eventIds[i]] = {
           title: titles[i],
           description: descriptions[i],
           ticketsAvailable: (areOpen[i] ? ticketsAvailabilities[i] : 0),
           ticketPrice: (areOpen[i] ? ticketsPrices[i] : "-"),
-          isOpen: areOpen[i]//,
-          // imageIpfsHash: imagesIpfsHashes[i]
+          isOpen: areOpen[i],
+          imageIpfsHash: ipfsHash
         };
       }
 
@@ -225,6 +223,7 @@ class App extends Component {
   }
 
   goBackToEvents() {
+    console.log("goBackToEvents");
     this.setState({
       viewMode: VIEW_MODE_EVENTS_LIST,
       inputNoOfTickets: "",
@@ -235,10 +234,10 @@ class App extends Component {
     });
   }
 
-  showEventInfo(event) {
-    console.log("showEventInfo id: ", event.target.id);
+  showEventInfo(id) {
+    console.log("showEventInfo id: ", id);
     this.setState({
-      selectedEventId: event.target.id,
+      selectedEventId: id,
       viewMode: VIEW_MODE_EVENT_INFO
     });
   }
@@ -288,9 +287,9 @@ class App extends Component {
         return;
       }
 
-      const imageIpfsHash = result[0]['hash'];
+      const imageIpfsHash = result[0]['path'];
 
-      console.log("ipfs hash: ", imageIpfsHash);
+      console.log("ipfs path", imageIpfsHash);
 
       this.state.contract.methods.addEvent(
         this.state.inputEventTitle,
@@ -300,7 +299,7 @@ class App extends Component {
         imageIpfsHash
       ).send({from: this.state.loginAddress})
       .on('receipt', (receipt) => {
-        //console.log("receit", receit);
+
         const id = receipt.events.LogEventAdded.returnValues['id'];
         const title = receipt.events.LogEventAdded.returnValues['title'];
         const description = receipt.events.LogEventAdded.returnValues['desc'];
@@ -322,11 +321,12 @@ class App extends Component {
 
         this.setState({
           events: newEventsList
+        }, () => {
+          this.goBackToEvents();
+          alert("Event Added!");
         });
 
-        this.goBackToEvents();
 
-        alert("Event Added!");
       })
       .on('error', (error) => {
         console.log("Error occurred: ", error);

@@ -7,6 +7,8 @@ const styleClosed = {color: '#ff3300'};
 export class EventInfo extends Component {
   constructor(props) {
     super(props);
+
+    // console.log("props to eventInfo:", props);
     this.getEventStatusStyle = this.getEventStatusStyle.bind(this);
   }
 
