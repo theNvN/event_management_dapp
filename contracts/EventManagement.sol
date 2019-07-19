@@ -6,7 +6,7 @@ contract EventManagement is Seriality {
 
     address payable public owner;
 
-    uint public idGenerator;
+    uint idGenerator;
 
     uint[] eventIds;
 
@@ -18,11 +18,12 @@ contract EventManagement is Seriality {
         uint sales;
         mapping (address => uint) buyers;
         bool isOpen;
+        string imageIpfsHash;
     }
 
     mapping (uint => Event) events;
 
-    event LogEventAdded(uint id, string title, string desc, uint ticketPrice, uint ticketsAvailable);
+    event LogEventAdded(uint id, string title, string desc, uint ticketPrice, uint ticketsAvailable, string imageIpfsHash);
     event LogBuyTickets(uint id, address buyer, uint numTickets);
     event LogGetRefund(uint id, address accountRefunded, uint numTickets);
     event LogEndSale(uint id, address owner, uint balance);
@@ -36,7 +37,7 @@ contract EventManagement is Seriality {
         _;
     }
 
-    function addEvent(string memory title, string memory description, uint price, uint ticketsAvailable)
+    function addEvent(string memory title, string memory description, uint price, uint ticketsAvailable, string memory imageIpfsHash)
       public
       isOwner
       returns (uint)
@@ -49,6 +50,7 @@ contract EventManagement is Seriality {
         evt.ticketsAvailable = ticketsAvailable;
         evt.sales = 0;
         evt.isOpen = true;
+        evt.imageIpfsHash = imageIpfsHash;
 
         uint eventId = idGenerator;
         events[eventId] = evt;
@@ -56,7 +58,7 @@ contract EventManagement is Seriality {
         eventIds.push(eventId);
         idGenerator++;
 
-        emit LogEventAdded(eventId, title, description, price, ticketsAvailable);
+        emit LogEventAdded(eventId, title, description, price, ticketsAvailable, events[eventId].imageIpfsHash);
 
         return eventId;
     }
@@ -138,10 +140,11 @@ contract EventManagement is Seriality {
       public
       view
       returns (uint[] memory ids, bytes memory titlesBuffer, bytes memory descriptionsBuffer, uint[] memory ticketsAvailable,
-      uint[] memory ticketsPrices, bool[] memory areOpen)
+      uint[] memory ticketsPrices, bool[] memory areOpen/*, bytes memory imagesIpfsHashesBuffer*/)
     {
         titlesBuffer = getEventsTitlesBuffer();
         descriptionsBuffer = getEventsDescriptionsBuffer();
+        // imagesIpfsHashesBuffer = getEventsImagesIpfsHashesBuffer();
 
         ids = new uint[](eventIds.length);
         ticketsAvailable = new uint[](eventIds.length);
@@ -228,6 +231,26 @@ contract EventManagement is Seriality {
 
       for (uint i = 0; i < eventIds.length; i++) {
         out = events[eventIds[i]].description;
+
+        stringToBytes(offset, bytes(out), buffer);
+        offset -= sizeOfString(out);
+      }
+
+      return buffer;
+    }
+
+    function getEventsImagesIpfsHashesBuffer()
+      public
+      view
+      returns(bytes memory)
+    {
+      uint offset = 64*eventIds.length;
+
+      bytes memory buffer = new bytes(offset);
+      string memory out = new string(32);
+
+      for (uint i = 0; i < eventIds.length; i++) {
+        out = events[eventIds[i]].imageIpfsHash;
 
         stringToBytes(offset, bytes(out), buffer);
         offset -= sizeOfString(out);

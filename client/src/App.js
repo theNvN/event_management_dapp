@@ -2,13 +2,14 @@ import React, { Component } from "react";
 import EventManagementContract from "./contracts/EventManagement.json";
 import getWeb3 from "./utils/getWeb3";
 import getDataFromBuffer from "./utils/getDataFromBuffer";
+import ipfs from "./utils/ipfs";
 
 import "./App.css";
 
 import { Events } from './Events.js';
 import { EventInfo } from './EventInfo.js';
 import { EventForm } from './EventForm.js';
-import { UserEvents } from './UserEvents.js'
+import { UserEvents } from './UserEvents.js';
 
 const VIEW_MODE_EVENTS_LIST = 'events_list';
 const VIEW_MODE_EVENT_INFO = 'event_info';
@@ -21,6 +22,7 @@ const FIELD_DESCRIPTION = 2;
 const FIELD_TICKETS_AVAILABLE = 3;
 const FIELD_TICKET_PRICE = 4;
 const FIELD_IS_OPEN = 5;
+const FIELD_IMAGE_IPFS_HASH = 6;
 
 const FIELD_USER_EVENT_ID = 0;
 const FIELD_USER_EVENT_TICKET_COUNT = 1;
@@ -49,7 +51,8 @@ class App extends Component {
       selectedEventId: 0,
 
       events: {},
-      participatedEvents: {}
+      participatedEvents: {},
+      currentFileBuffer: null
     };
 
     this.handleNoOfTicketsChange = this.handleNoOfTicketsChange.bind(this);
@@ -64,6 +67,7 @@ class App extends Component {
     this.addEvent = this.addEvent.bind(this);
     this.showUserEvents = this.showUserEvents.bind(this);
     this.endSale = this.endSale.bind(this);
+    this.captureFile = this.captureFile.bind(this);
   }
 
   componentDidMount = async () => {
@@ -83,6 +87,8 @@ class App extends Component {
         deployedNetwork && deployedNetwork.address,
       );
 
+      console.log("contract address: ", instance);
+
       const owner = await instance.methods.owner().call();
       console.log("accounts, owner", accounts + ", " + owner);
 
@@ -94,6 +100,7 @@ class App extends Component {
         });
       });
 
+      console.log("getting gas price");
       web3.eth.getGasPrice()
       .then((result) => {
         let gasPrice = Number(result);
@@ -102,8 +109,9 @@ class App extends Component {
         });
       });
 
-
+      console.log("getting eventsData");
       const eventsData = await instance.methods.getEventsData().call();
+      console.log("setting distinct data");
       const eventIds = eventsData[FIELD_ID];
       const titlesBuffer = eventsData[FIELD_TITLE];
       const titles = getDataFromBuffer(titlesBuffer);
@@ -112,6 +120,10 @@ class App extends Component {
       const ticketsAvailabilities = eventsData[FIELD_TICKETS_AVAILABLE];
       const ticketsPrices = eventsData[FIELD_TICKET_PRICE];
       const areOpen = eventsData[FIELD_IS_OPEN];
+      // console.log("Getting ipfs hashes");
+      // const imagesIpfsHashesBuffer = eventsData[FIELD_IMAGE_IPFS_HASH];
+      // const imagesIpfsHashes = getDataFromBuffer(imagesIpfsHashesBuffer);
+      // console.log("imageIpfsHashes: ", imagesIpfsHashes);
 
       let events = {};
       for (let i = 0; i < eventIds.length; i++) {
@@ -120,7 +132,8 @@ class App extends Component {
           description: descriptions[i],
           ticketsAvailable: (areOpen[i] ? ticketsAvailabilities[i] : 0),
           ticketPrice: (areOpen[i] ? ticketsPrices[i] : "-"),
-          isOpen: areOpen[i]
+          isOpen: areOpen[i]//,
+          // imageIpfsHash: imagesIpfsHashes[i]
         };
       }
 
@@ -136,7 +149,8 @@ class App extends Component {
           title: event.title,
           description: event.description,
           isOpen: event.isOpen,
-          ticketPurchaseCount: userEventTicketCounts[i]
+          ticketPurchaseCount: userEventTicketCounts[i],
+          imageIpfsHash: event.imageIpfsHash
         };
       }
 
@@ -267,43 +281,58 @@ class App extends Component {
   addEvent = async(event) => {
     console.log("addEvent");
     event.preventDefault();
-    //console.log("description: ", this.state.inputEventDescription);
-    this.state.contract.methods.addEvent(
-      this.state.inputEventTitle,
-      this.state.inputEventDescription,
-      this.state.inputEventTicketPrice,
-      this.state.inputEventTicketsCount
-    ).send({from: this.state.loginAddress})
-    .on('receipt', (receipt) => {
-      //console.log("receit", receit);
-      const id = receipt.events.LogEventAdded.returnValues['id'];
-      const title = receipt.events.LogEventAdded.returnValues['title'];
-      const description = receipt.events.LogEventAdded.returnValues['desc'];
-      const ticketPrice = receipt.events.LogEventAdded.returnValues['ticketPrice'];
-      const ticketsAvailable = receipt.events.LogEventAdded.returnValues['ticketsAvailable'];
-      const isOpen = true; // by default
 
-      console.log("EventInfo: ", id + ", " + title + ", " + description + ", " + ticketPrice + ", " + ticketsAvailable + ", " + isOpen);
-      let newEventsList = Object.assign({}, this.state.events);
-      newEventsList[id] = {
-        title: title,
-        description: description,
-        ticketPrice: ticketPrice,
-        ticketsAvailable: ticketsAvailable,
-        isOpen: isOpen
-      };
+    ipfs.add(this.state.currentFileBuffer, (error, result) => {
+      if (error) {
+        console.log("error: ", error);
+        return;
+      }
 
-      this.setState({
-        events: newEventsList
+      const imageIpfsHash = result[0]['hash'];
+
+      console.log("ipfs hash: ", imageIpfsHash);
+
+      this.state.contract.methods.addEvent(
+        this.state.inputEventTitle,
+        this.state.inputEventDescription,
+        this.state.inputEventTicketPrice,
+        this.state.inputEventTicketsCount,
+        imageIpfsHash
+      ).send({from: this.state.loginAddress})
+      .on('receipt', (receipt) => {
+        //console.log("receit", receit);
+        const id = receipt.events.LogEventAdded.returnValues['id'];
+        const title = receipt.events.LogEventAdded.returnValues['title'];
+        const description = receipt.events.LogEventAdded.returnValues['desc'];
+        const ticketPrice = receipt.events.LogEventAdded.returnValues['ticketPrice'];
+        const ticketsAvailable = receipt.events.LogEventAdded.returnValues['ticketsAvailable'];
+        const isOpen = true; // by default
+        const imageIpfsHash = receipt.events.LogEventAdded.returnValues['imageIpfsHash'];
+
+        console.log("EventInfo: ", id + ", " + title + ", " + description + ", " + ticketPrice + ", " + ticketsAvailable + ", " + isOpen + ", " + imageIpfsHash);
+        let newEventsList = Object.assign({}, this.state.events);
+        newEventsList[id] = {
+          title: title,
+          description: description,
+          ticketPrice: ticketPrice,
+          ticketsAvailable: ticketsAvailable,
+          isOpen: isOpen,
+          imageIpfsHash: imageIpfsHash
+        };
+
+        this.setState({
+          events: newEventsList
+        });
+
+        this.goBackToEvents();
+
+        alert("Event Added!");
+      })
+      .on('error', (error) => {
+        console.log("Error occurred: ", error);
       });
 
-      this.goBackToEvents();
-
-      alert("Event Added!");
-    })
-    .on('error', (error) => {
-      console.log("Error occurred: ", error);
-    })
+    });
   }
 
   endSale = async(event) => {
@@ -358,6 +387,20 @@ class App extends Component {
     });
   }
 
+  captureFile(event) {
+    event.preventDefault();
+    console.log("captureFile");
+    const file = event.target.files[0];
+    const reader = new window.FileReader();
+    reader.readAsArrayBuffer(file);
+    reader.onloadend = () => {
+      this.setState({
+        currentFileBuffer: Buffer(reader.result)
+      });
+      console.log("Buffer: ", Buffer(reader.result));
+    }
+  }
+
   render() {
     if (!this.state.web3) {
       return <div>Loading Web3, accounts, and contract...</div>;
@@ -396,6 +439,7 @@ class App extends Component {
           handleEventTicketPriceChange={this.handleEventTicketPriceChange}
           handleEventDescriptionChange={this.handleEventDescriptionChange}
           addEvent={this.addEvent}
+          captureFile={this.captureFile}
           goBackToEvents={this.goBackToEvents}/>
       );
     } else {
