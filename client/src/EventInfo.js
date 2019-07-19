@@ -10,6 +10,7 @@ export class EventInfo extends Component {
 
     // console.log("props to eventInfo:", props);
     this.getEventStatusStyle = this.getEventStatusStyle.bind(this);
+    this.getIpfsUrl = this.getIpfsUrl.bind(this);
   }
 
   getEventStatusStyle(isOpen) {
@@ -20,6 +21,11 @@ export class EventInfo extends Component {
     return styleClosed;
   }
 
+  getIpfsUrl(ipfsHash) {
+    console.log("getIpfsHash ipfsHash: ", ipfsHash);
+    return ("https://ipfs.io/ipfs/" + ipfsHash);
+  }
+
   render() {
     return (
       <div className="eventInfoContainer">
@@ -27,7 +33,8 @@ export class EventInfo extends Component {
         <div id="infoEventTitle">{this.props.event.title}</div>
         <div id="infoEventIsOpen">
           Status: <div style={this.getEventStatusStyle(this.props.event.isOpen)}> {this.props.event.isOpen ? "OPEN" : "CLOSED"}</div>
-      </div>
+        </div>
+        <img id="infoEventImage" src={this.getIpfsUrl(this.props.event.imageIpfsHash)} alt="event" />
         <div id="infoEventDescription"><div>Description</div> <br /> {this.props.event.description} </div>
         <div id="infoTicketInfo">
           <div id="infoTicketInfoLabel">Get Tickets Here</div>

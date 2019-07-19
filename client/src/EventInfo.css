@@ -50,6 +50,10 @@
   margin: 10px 40px;
 }
 
+#infoEventImage {
+  margin-top: 20px;
+}
+
 #infoTicketInfo {
   display: flex;
   flex-direction: column;

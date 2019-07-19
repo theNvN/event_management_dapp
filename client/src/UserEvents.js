@@ -8,8 +8,11 @@ export class UserEvents extends React.Component {
   constructor(props) {
     super(props);
 
+    console.log("props ", props);
+
     this.getParticipatedEventsArray = this.getParticipatedEventsArray.bind(this);
     this.getEventStatusStyle = this.getEventStatusStyle.bind(this);
+    this.getIpfsUrl = this.getIpfsUrl.bind(this);
   }
 
   getEventStatusStyle(isOpen) {
@@ -20,6 +23,11 @@ export class UserEvents extends React.Component {
     return styleClosed;
   }
 
+  getIpfsUrl(ipfsHash) {
+    console.log("getIpfsHash ipfsHash: ", ipfsHash);
+    return ("https://ipfs.io/ipfs/" + ipfsHash);
+  }
+
   getParticipatedEventsArray() {
     return Object.keys(this.props.participatedEvents).map((key) => {
       return {
@@ -27,7 +35,8 @@ export class UserEvents extends React.Component {
         title: this.props.participatedEvents[key]['title'],
         description: this.props.participatedEvents[key]['description'],
         isOpen: this.props.participatedEvents[key]['isOpen'],
-        ticketPurchaseCount: this.props.participatedEvents[key]['ticketPurchaseCount']
+        ticketPurchaseCount: this.props.participatedEvents[key]['ticketPurchaseCount'],
+        imageIpfsHash: this.props.participatedEvents[key]['imageIpfsHash']
       };
     });
   }
@@ -37,6 +46,7 @@ export class UserEvents extends React.Component {
       return (
         <div className="userEvent" key={event.id}>
           <div className="upper">
+            <img className="userEventImage" src={this.getIpfsUrl(event.imageIpfsHash)} alt="event" />
             <div className="userEventId">Event Id: {event.id}</div>
             <div className="isUserEventOpen" style={this.getEventStatusStyle(event.isOpen)}>{event.isOpen ? "OPEN" : "CLOSED"}</div>
           </div>

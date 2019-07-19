@@ -209,7 +209,8 @@ class App extends Component {
         title: this.state.events[eventId].title,
         description: this.state.events[eventId].description,
         isOpen: this.state.events[eventId].isOpen,
-        ticketPurchaseCount: Number(numTickets) + Number(initialPurchaseCount)
+        ticketPurchaseCount: Number(numTickets) + Number(initialPurchaseCount),
+        imageIpfsHash: this.state.events[eventId].imageIpfsHash
       };
 
       this.setState({

@@ -48,23 +48,43 @@
 }
 
 .upper {
+  position: relative;
   display: flex;
   flex-direction: column;
   height: 150px;
   background: #e6ffe6;
-  padding: 20px;
   border-radius: 10px 10px 0px 0px;
   cursor: pointer;
   align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+.userEventImage {
+  flex-shrink: 0;
+  width: 450px;
+  height: auto;
+  min-width: 100%;
+  min-height: 100%;
+  object-fit: cover;
 }
 
 .userEventId {
+  position: absolute;
   align-self: flex-start;
   font-size: 0.8em;
+  top: 10px;
+  left: 10px;
+  background: rgb(255, 255, 255, 0.7);
+  border-radius: 5px;
 }
 
 .isUserEventOpen {
+  position: absolute;
   font-weight: bold;
+  background: rgb(255, 255, 255, 0.7);
+  border-radius: 5px;
+  padding: 5px;
 }
 
 .lower {
