@@ -38,7 +38,7 @@ contract EventManagement is Seriality {
     mapping (uint => Event) events;
 
     /*Logs for contract transactions*/
-    event LogEventAdded(uint id, string title, string desc, uint ticketPrice, uint ticketsAvailable, string imageIpfsHash);
+    event LogEventAdded(uint id, string title, string description, uint ticketPrice, uint ticketsAvailable, string imageIpfsHash);
     event LogBuyTickets(uint id, address buyer, uint numTickets);
     event LogGetRefund(uint id, address accountRefunded, uint numTickets);
     event LogEndSale(uint id, address owner, uint balance);
@@ -111,7 +111,7 @@ contract EventManagement is Seriality {
     }
 
     /// @notice Get the number of tickets the buyer bought
-    /// @eventId Id of the event
+    /// @param eventId Id of the event
     /// @return No of tickets bought
     function getBuyerNumberTickets(uint eventId)
       public
@@ -122,7 +122,7 @@ contract EventManagement is Seriality {
     }
 
     /// @notice Allows owner to end sale of an event
-    /// @eventId Id of the event to end the sale for
+    /// @param eventId Id of the event to end the sale for
     function endSale(uint eventId)
       public
       isOwner
@@ -260,7 +260,7 @@ contract EventManagement is Seriality {
     function readEvent(uint eventId)
       public
       view
-      returns(string memory title, string memory description, uint ticketPrice, uint ticketsAvailable, uint sales, bool isOpen)
+      returns(string memory title, string memory description, uint ticketPrice, uint ticketsAvailable, uint sales, bool isOpen, string memory imageIpfsHash)
     {
         title = events[eventId].title;
         description = events[eventId].description;
@@ -268,6 +268,7 @@ contract EventManagement is Seriality {
         ticketsAvailable = events[eventId].ticketsAvailable;
         sales = events[eventId].sales;
         isOpen = events[eventId].isOpen;
+        imageIpfsHash = events[eventId].imageIpfsHash;
     }
 
 }
