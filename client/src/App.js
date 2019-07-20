@@ -52,7 +52,8 @@ class App extends Component {
 
       events: {},
       participatedEvents: {},
-      currentFileBuffer: null
+      currentFileBuffer: null,
+      isWorking: false
     };
 
     this.handleNoOfTicketsChange = this.handleNoOfTicketsChange.bind(this);
@@ -175,7 +176,6 @@ class App extends Component {
   };
 
   handleNoOfTicketsChange(event) {
-    // console.log("handleNoOfTicketsChange value: ", event.target.value);
     this.setState({
       inputNoOfTickets: event.target.value
     });
@@ -224,19 +224,18 @@ class App extends Component {
   }
 
   goBackToEvents() {
-    console.log("goBackToEvents");
     this.setState({
       viewMode: VIEW_MODE_EVENTS_LIST,
       inputNoOfTickets: "",
       inputEventTitle: "",
       inputEventTicketsCount: "",
       inputEventTicketPrice: "",
-      inputEventDescription: ""
+      inputEventDescription: "",
+      isWorking: false
     });
   }
 
   showEventInfo(id) {
-    console.log("showEventInfo id: ", id);
     this.setState({
       selectedEventId: id,
       viewMode: VIEW_MODE_EVENT_INFO
@@ -244,43 +243,41 @@ class App extends Component {
   }
 
   showAddEventForm(event) {
-    console.log("showAddEventForm");
     this.setState({
       viewMode: VIEW_MODE_EVENT_FORM
     });
   }
 
   handleEventTitleChange(event) {
-    //console.log("handleEventTitleChange value: ", event.target.value);
     this.setState({
       inputEventTitle: event.target.value
     });
   }
 
   handleEventTicketsCountChange(event) {
-    //console.log("handleEventTicketsCountChange value: ", event.target.value);
     this.setState({
       inputEventTicketsCount: event.target.value
     });
   }
 
   handleEventTicketPriceChange(event) {
-    //console.log("handleEventTicketPriceChange value: ", event.target.value);
     this.setState({
       inputEventTicketPrice: event.target.value
     });
   }
 
   handleEventDescriptionChange(event) {
-    //console.log("handleEventDescriptionChange value: ", event.target.value);
     this.setState({
       inputEventDescription: event.target.value
     });
   }
 
   addEvent = async(event) => {
-    console.log("addEvent");
     event.preventDefault();
+
+    this.setState({
+      isWorking: true
+    });
 
     ipfs.add(this.state.currentFileBuffer, (error, result) => {
       if (error) {
@@ -289,8 +286,6 @@ class App extends Component {
       }
 
       const imageIpfsHash = result[0]['path'];
-
-      console.log("ipfs path", imageIpfsHash);
 
       this.state.contract.methods.addEvent(
         this.state.inputEventTitle,
@@ -309,7 +304,6 @@ class App extends Component {
         const isOpen = true; // by default
         const imageIpfsHash = receipt.events.LogEventAdded.returnValues['imageIpfsHash'];
 
-        console.log("EventInfo: ", id + ", " + title + ", " + description + ", " + ticketPrice + ", " + ticketsAvailable + ", " + isOpen + ", " + imageIpfsHash);
         let newEventsList = Object.assign({}, this.state.events);
         newEventsList[id] = {
           title: title,
@@ -317,7 +311,8 @@ class App extends Component {
           ticketPrice: ticketPrice,
           ticketsAvailable: ticketsAvailable,
           isOpen: isOpen,
-          imageIpfsHash: imageIpfsHash
+          imageIpfsHash: imageIpfsHash,
+          isWorking: false
         };
 
         this.setState({
@@ -352,7 +347,8 @@ class App extends Component {
         description: newEventsList[eventId].description,
         ticketPrice: "-",
         ticketsAvailable: 0,
-        isOpen: false
+        isOpen: false,
+        imageIpfsHash: newEventsList[eventId].imageIpfsHash
       };
 
       let newUserEventsList = Object.assign({}, this.state.participatedEvents);
@@ -362,6 +358,7 @@ class App extends Component {
           title: newUserEventsList[eventId].title,
           description: newUserEventsList[eventId].description,
           isOpen: false,
+          imageIpfsHash: newUserEventsList[eventId].imageIpfsHash,
           ticketPurchaseCount: newUserEventsList[eventId].ticketPurchaseCount
         };
     }
@@ -382,7 +379,6 @@ class App extends Component {
   }
 
   showUserEvents() {
-    console.log("showUserEvents");
     this.setState({
       viewMode: VIEW_MODE_EVENT_USER
     });
@@ -390,7 +386,6 @@ class App extends Component {
 
   captureFile(event) {
     event.preventDefault();
-    console.log("captureFile");
     const file = event.target.files[0];
     const reader = new window.FileReader();
     reader.readAsArrayBuffer(file);
@@ -398,7 +393,6 @@ class App extends Component {
       this.setState({
         currentFileBuffer: Buffer(reader.result)
       });
-      console.log("Buffer: ", Buffer(reader.result));
     }
   }
 
@@ -441,7 +435,8 @@ class App extends Component {
           handleEventDescriptionChange={this.handleEventDescriptionChange}
           addEvent={this.addEvent}
           captureFile={this.captureFile}
-          goBackToEvents={this.goBackToEvents}/>
+          goBackToEvents={this.goBackToEvents}
+          isWorking={this.state.isWorking}/>
       );
     } else {
       renderComponent = (
@@ -455,7 +450,9 @@ class App extends Component {
       <div className="wrapper">
         <div id="appTitle">Event Management</div>
         <div className="container">
-          <div id="userLoginAddress">{this.state.loginAddress}</div>
+          <div id="userLoginAddress">
+            <span id="loginAddressLabel">{this.state.owner == this.state.loginAddress ? "Owner " : "User "}</span>
+            {this.state.loginAddress}</div>
           <div id="loginAddressBalance">Balance:&nbsp; {this.state.loginAddressBalance} wei</div>
           {renderComponent}
         </div>

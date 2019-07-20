@@ -57,7 +57,17 @@
   text-align: center;
 }
 
+#loginAddressLabel {
+  font-size: 0.5em;
+  margin: 4px 10px;
+  background: rgb(255, 255, 255, 0.6);
+  padding: 1px;
+  border-radius: 5px;
+  align-self: flex-start;
+}
+
 #userLoginAddress {
+  display: flex;
   width: 50%;
   font-size: 1.5em;
   background: #000;
@@ -65,6 +75,8 @@
   padding: 15px;
   border-radius: 10px;
   text-align: center;
+  align-items: center;
+  justify-content: center;
 }
 
 #loginAddressBalance {

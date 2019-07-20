@@ -22,7 +22,6 @@ export class Events extends Component {
   }
 
   getIpfsUrl(ipfsHash) {
-    console.log("getIpfsHash ipfsHash: ", ipfsHash);
     return ("https://ipfs.io/ipfs/" + ipfsHash);
   }
 

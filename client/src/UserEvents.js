@@ -8,8 +8,6 @@ export class UserEvents extends React.Component {
   constructor(props) {
     super(props);
 
-    console.log("props ", props);
-
     this.getParticipatedEventsArray = this.getParticipatedEventsArray.bind(this);
     this.getEventStatusStyle = this.getEventStatusStyle.bind(this);
     this.getIpfsUrl = this.getIpfsUrl.bind(this);
@@ -24,7 +22,6 @@ export class UserEvents extends React.Component {
   }
 
   getIpfsUrl(ipfsHash) {
-    console.log("getIpfsHash ipfsHash: ", ipfsHash);
     return ("https://ipfs.io/ipfs/" + ipfsHash);
   }
 

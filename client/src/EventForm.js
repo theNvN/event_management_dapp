@@ -9,7 +9,6 @@ export class EventForm extends Component {
   }
 
   getIpfsUrl() {
-    console.log("getIpfsHash ipfsHash: ", this.props.ipfsHash);
     return ("https://ipfs.io/ipfs/" + this.props.ipfsHash);
   }
 
@@ -44,7 +43,9 @@ export class EventForm extends Component {
             <textarea id="formEventDescription" rows="10" cols="80" value={this.props.inputEventDescription} onChange={this.props.handleEventDescriptionChange} />
           </label>
 
-          <input type="submit" onClick={this.props.addEvent} />
+          {this.props.isWorking ? <p>Uploading image to Ipfs. Please Wait...</p> : ""}
+
+          <input id="formEventSubmitBtn" type="submit" onClick={this.props.addEvent} disabled={this.props.isWorking} />
         </form>
       </div>
     );
