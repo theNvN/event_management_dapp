@@ -74,7 +74,6 @@ class App extends Component {
   }
 
   componentDidMount = async () => {
-    console.log("componentDidMount called.");
     try {
       // Get network provider and web3 instance.
       const web3 = await getWeb3();
@@ -90,10 +89,7 @@ class App extends Component {
         deployedNetwork && deployedNetwork.address,
       );
 
-      console.log("contract address: ", instance);
-
       const owner = await instance.methods.owner().call();
-      console.log("accounts, owner", accounts + ", " + owner);
 
       // Get balance of logged in account
       web3.eth.getBalance(accounts[0])
@@ -180,7 +176,9 @@ class App extends Component {
 
   buyTickets = async(event) => {
     event.preventDefault();
-    if (this.state.inputNoOfTickets == 0) {
+    if (this.state.inputNoOfTickets <= 0 || this.state.inputNoOfTickets == ""
+      || this.state.inputNoOfTickets > this.state.events[this.state.selectedEventId].ticketsAvailable) {
+      alert("Enter a valid input!");
       return;
     }
 
@@ -277,6 +275,13 @@ class App extends Component {
 
   addEvent = async(event) => {
     event.preventDefault();
+
+    if (this.state.inputEventTitle == "" || this.state.inputEventDescription == ""
+      || this.state.inputEventTicketPrice == "" || this.state.inputEventTicketsCount == ""
+      || this.state.currentFileBuffer == null) {
+        alert("All fields are required!");
+        return;
+      }
 
     this.setState({
       isWorking: true

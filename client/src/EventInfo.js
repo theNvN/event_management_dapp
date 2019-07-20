@@ -24,7 +24,6 @@ export class EventInfo extends Component {
   }
 
   getIpfsUrl(ipfsHash) {
-    console.log("getIpfsHash ipfsHash: ", ipfsHash);
     return ("https://ipfs.io/ipfs/" + ipfsHash);
   }
 
@@ -54,8 +53,7 @@ export class EventInfo extends Component {
           CLOSE EVENT & WITHDRAW AMOUNT
         </button>
         :
-        ""
-      }
+        ""}
       </div>
     );
   }
