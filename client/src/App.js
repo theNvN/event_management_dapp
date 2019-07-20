@@ -27,6 +27,8 @@ const FIELD_IMAGE_IPFS_HASH = 6;
 const FIELD_USER_EVENT_ID = 0;
 const FIELD_USER_EVENT_TICKET_COUNT = 1;
 
+const oneGWei = 1000000000;
+
 class App extends Component {
 
   constructor(props) {
@@ -213,13 +215,19 @@ class App extends Component {
         imageIpfsHash: this.state.events[eventId].imageIpfsHash
       };
 
-      this.setState({
-        events: newEventsList,
-        participatedEvents: newUserEventsList,
-        inputNoOfTickets: ""
+      this.state.web3.eth.getBalance(this.state.loginAddress)
+      .then((balance) => {
+        console.log("newBalance ", balance);
+        this.setState({
+          events: newEventsList,
+          participatedEvents: newUserEventsList,
+          inputNoOfTickets: "",
+          loginAddressBalance: balance
+        });
+
+        alert(numTickets + " ticket(s) successfully bought!");
       });
 
-      alert(numTickets + " ticket(s) successfully bought!");
     });
   }
 
@@ -290,7 +298,7 @@ class App extends Component {
       this.state.contract.methods.addEvent(
         this.state.inputEventTitle,
         this.state.inputEventDescription,
-        this.state.inputEventTicketPrice,
+        Number(this.state.inputEventTicketPrice)*oneGWei,
         this.state.inputEventTicketsCount,
         imageIpfsHash
       ).send({from: this.state.loginAddress})
@@ -315,13 +323,16 @@ class App extends Component {
           isWorking: false
         };
 
-        this.setState({
-          events: newEventsList
-        }, () => {
-          this.goBackToEvents();
-          alert("Event Added!");
+        this.state.web3.eth.getBalance(this.state.loginAddress)
+        .then((balance) => {
+          this.setState({
+            loginAddressBalance: balance,
+            events: newEventsList
+          }, () => {
+            this.goBackToEvents();
+            alert("Event Added!");
+          });
         });
-
 
       })
       .on('error', (error) => {
@@ -361,16 +372,19 @@ class App extends Component {
           imageIpfsHash: newUserEventsList[eventId].imageIpfsHash,
           ticketPurchaseCount: newUserEventsList[eventId].ticketPurchaseCount
         };
-    }
+      }
 
-      this.setState({
-        events: newEventsList,
-        participatedEvents: newUserEventsList
+      this.state.web3.eth.getBalance(this.state.loginAddress)
+      .then((balance) => {
+        this.setState({
+          loginAddressBalance: balance,
+          events: newEventsList,
+          participatedEvents: newUserEventsList
+        }, () => {
+          this.goBackToEvents();
+          alert("Event sale closed!");
+        });
       });
-
-      this.goBackToEvents();
-
-      alert("Event sale closed!");
 
     })
     .on('error', (error) => {
@@ -453,7 +467,7 @@ class App extends Component {
           <div id="userLoginAddress">
             <span id="loginAddressLabel">{this.state.owner == this.state.loginAddress ? "Owner " : "User "}</span>
             {this.state.loginAddress}</div>
-          <div id="loginAddressBalance">Balance:&nbsp; {this.state.loginAddressBalance} wei</div>
+          <div id="loginAddressBalance">Balance:&nbsp; {this.state.loginAddressBalance/oneGWei} gWei</div>
           {renderComponent}
         </div>
       </div>

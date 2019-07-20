@@ -1,6 +1,8 @@
 import React, { Component } from "react";
 import './EventForm.css';
 
+const oneGWei = 1000000000;
+
 export class EventForm extends Component {
   constructor(props) {
     super(props);
@@ -30,7 +32,8 @@ export class EventForm extends Component {
 
           <label>
             Ticket Price:<br />
-            <input id="formEventTicketPrice" type="number" value={this.props.inputEventTicketPrice} onChange={this.props.handleEventTicketPriceChange} />
+          <input id="formEventTicketPrice" type="number" value={this.props.inputEventTicketPrice} onChange={this.props.handleEventTicketPriceChange} />
+          &nbsp;gWei
           </label>
 
           <label>

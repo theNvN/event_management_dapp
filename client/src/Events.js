@@ -4,6 +4,8 @@ import './Events.css';
 const styleOpen = {color: '#008000'};
 const styleClosed = {color: '#ff3300'};
 
+const oneGWei = 1000000000;
+
 export class Events extends Component {
   constructor(props) {
     super(props);
@@ -53,7 +55,7 @@ export class Events extends Component {
           </div>
           <div className="lower">
             <div className="eventTitle">{event.title}</div>
-            <div className="ticketPrice">Price: {event.ticketPrice}</div>
+            <div className="ticketPrice">Price: {isNaN(event.ticketPrice) ? "-" : event.ticketPrice/oneGWei + " gWei"}</div>
             <div className="ticketsAvailable">Tickets Left: {event.ticketsAvailable}</div>
           </div>
         </div>

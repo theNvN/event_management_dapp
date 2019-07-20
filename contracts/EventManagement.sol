@@ -97,23 +97,6 @@ contract EventManagement is Seriality {
         emit LogBuyTickets(eventId, msg.sender, noOfTickets);
     }
 
-
-    function getRefund(uint eventId)
-      public
-    {
-        require(events[eventId].buyers[msg.sender] > 0);
-
-        uint noOfTicketsToRefund = events[eventId].buyers[msg.sender];
-        uint refundAmount = events[eventId].ticketPrice*noOfTicketsToRefund;
-
-        events[eventId].sales -= noOfTicketsToRefund;
-        msg.sender.transfer(refundAmount);
-        events[eventId].ticketsAvailable += noOfTicketsToRefund;
-
-        emit LogGetRefund(eventId, msg.sender, noOfTicketsToRefund);
-    }
-
-
     function getBuyerNumberTickets(uint eventId)
       public
       view
@@ -239,25 +222,6 @@ contract EventManagement is Seriality {
       return buffer;
     }
 
-    function getIpfsHashesBuffer()
-      public
-      view
-      returns(bytes memory)
-    {
-      uint offset = 64*eventIds.length;
-
-      bytes memory buffer = new bytes(offset);
-      string memory out = new string(32);
-
-      for (uint i = 0; i < eventIds.length; i++) {
-        out = events[eventIds[i]].imageIpfsHash;
-
-        stringToBytes(offset, bytes(out), buffer);
-        offset -= sizeOfString(out);
-      }
-
-      return buffer;
-    }
 
     function getEventImageIpfsHash(uint eventId)
       public
@@ -267,57 +231,4 @@ contract EventManagement is Seriality {
       return events[eventId].imageIpfsHash;
     }
 
-    // function getEventsBufferBytes()
-    //   public
-    //   view
-    //   returns (bytes memory, bytes memory, bytes memory, bytes memory, bytes memory)
-    // {
-    //     //uint length = eventIds.length;
-
-    //     // uint titleOffset = 64*length;
-    //     // uint descriptionOffset = 64*length;
-    //     // uint ticketsAvailableOffset =4*length;
-    //     // uint ticketPriceOffset = 4*length;
-    //     // uint isOpenOffset = 1*length;
-
-    //     uint offset = 64*eventIds.length + 64*eventIds.length + 4*eventIds.length + 4*eventIds.length + eventIds.length;
-
-    //     bytes memory titleBuffer = new bytes(64*eventIds.length);
-    //     bytes memory descriptionBuffer = new bytes(64*eventIds.length);
-    //     bytes memory ticketsAvailableBuffer = new bytes(4*eventIds.length);
-    //     bytes memory ticketPriceBuffer = new bytes(4*eventIds.length);
-    //     bytes memory isOpenBuffer = new bytes(eventIds.length);
-
-    //     string memory titleOut = new string(32);
-    //     string memory descriptionOut = new string(32);
-    //     uint ticketsAvailableOut;
-    //     uint ticketPriceOut;
-    //     bool isOpenOut;
-
-    //     for (uint i = 0; i < eventIds.length; i++) {
-    //         titleOut = events[eventIds[i]].title;
-    //         descriptionOut = events[eventIds[i]].description;
-    //         ticketsAvailableOut = events[eventIds[i]].ticketsAvailable;
-    //         ticketPriceOut = events[eventIds[i]].ticketPrice;
-    //         isOpenOut = events[eventIds[i]].isOpen;
-
-    //         stringToBytes(offset, bytes(titleOut), titleBuffer);
-    //         offset -= sizeOfString(titleOut);
-
-    //         stringToBytes(offset, bytes(descriptionOut), descriptionBuffer);
-    //         offset -= sizeOfString(descriptionOut);
-
-    //         uintToBytes(offset, ticketsAvailableOut, ticketsAvailableBuffer);
-    //         offset -= sizeOfUint(256);
-
-    //         uintToBytes(offset, ticketPriceOut, ticketPriceBuffer);
-    //         offset -= sizeOfUint(256);
-
-    //         boolToBytes(offset, isOpenOut, isOpenBuffer);
-    //         offset -= sizeOfBool();
-    //     }
-
-    //     return (titleBuffer, descriptionBuffer, ticketsAvailableBuffer, ticketPriceBuffer, isOpenBuffer);
-
-    // }
 }

@@ -4,6 +4,8 @@ import './EventInfo.css';
 const styleOpen = {color: '#008000'};
 const styleClosed = {color: '#ff3300'};
 
+const oneGWei = 1000000000;
+
 export class EventInfo extends Component {
   constructor(props) {
     super(props);
@@ -38,7 +40,7 @@ export class EventInfo extends Component {
         <div id="infoEventDescription"><div>Description</div> <br /> {this.props.event.description} </div>
         <div id="infoTicketInfo">
           <div id="infoTicketInfoLabel">Get Tickets Here</div>
-          <div id="infoTicketPrice">Ticket Price: {this.props.event.ticketPrice} </div>
+          <div id="infoTicketPrice">Ticket Price: {isNaN(this.props.event.ticketPrice) ? "-" : this.props.event.ticketPrice/oneGWei + " gWei"} </div>
           <div id="infoTicketsAvailable">Tickets Left: {this.props.event.ticketsAvailable} </div>
           <form id="infoFormBuyTickets">
             <div>Enter ticket count: </div>
