@@ -103,7 +103,6 @@ class App extends Component {
         });
       });
 
-      console.log("getting gas price");
       web3.eth.getGasPrice()
       .then((result) => {
         let gasPrice = Number(result);
@@ -112,9 +111,8 @@ class App extends Component {
         });
       });
 
-      console.log("getting eventsData");
       const eventsData = await instance.methods.getEventsData().call();
-      console.log("setting distinct data");
+
       const eventIds = eventsData[FIELD_ID];
       const titlesBuffer = eventsData[FIELD_TITLE];
       const titles = getDataFromBuffer(titlesBuffer);
@@ -138,7 +136,6 @@ class App extends Component {
         };
       }
 
-      console.log("Getting user tickets data");
       const buyerTicketsData = await instance.methods.getBuyerPurchases().call({from: accounts[0]});
       const userEventIds = buyerTicketsData[FIELD_USER_EVENT_ID];
       const userEventTicketCounts = buyerTicketsData[FIELD_USER_EVENT_TICKET_COUNT];
@@ -154,8 +151,6 @@ class App extends Component {
           imageIpfsHash: event.imageIpfsHash
         };
       }
-
-      console.log("Setting state");
 
       // Set state
       this.setState({

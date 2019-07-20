@@ -4,12 +4,25 @@ import "./libraries/Seriality/src/Seriality.sol";
 
 contract EventManagement is Seriality {
 
+    /*Address of owner of contract*/
     address payable public owner;
 
+    /*For generating unique id of an event*/
     uint idGenerator;
 
+    /*Array of ids of all events*/
     uint[] eventIds;
 
+    /*
+    Represents an individual event
+     title: Title of the event
+     description: Description of event
+     ticketsAvailable: No. of tickets currently available for sale
+     ticketPrice: Price of one ticket
+     sales: Total no. of tickets sold
+     buyers: Mapping of a buyer address to no. of tickets bought
+     imageIpfsHash: Ipfs hash of the event image
+    */
     struct Event {
         string title;
         string description;
@@ -21,22 +34,33 @@ contract EventManagement is Seriality {
         string imageIpfsHash;
     }
 
+    /*Mapping of event id to event struct*/
     mapping (uint => Event) events;
 
+    /*Logs for contract transactions*/
     event LogEventAdded(uint id, string title, string desc, uint ticketPrice, uint ticketsAvailable, string imageIpfsHash);
     event LogBuyTickets(uint id, address buyer, uint numTickets);
     event LogGetRefund(uint id, address accountRefunded, uint numTickets);
     event LogEndSale(uint id, address owner, uint balance);
 
+    /// @notice Deploying address is set as owner of contract
     constructor() public {
         owner = msg.sender;
     }
 
+    /*Checks if sender address is owner*/
     modifier isOwner() {
         require(msg.sender == owner);
         _;
     }
 
+    /// @notice Adds an event to contract
+    /// @param title Title of event
+    /// @param description Description of the event
+    /// @param price Price of one ticket for this event
+    /// @param ticketsAvailable Total tickets available for sale
+    /// @param imageIpfsHash Ipfs hash of the event image poster
+    /// @return Id of addded event
     function addEvent(string memory title, string memory description, uint price, uint ticketsAvailable, string memory imageIpfsHash)
       public
       isOwner
@@ -63,20 +87,9 @@ contract EventManagement is Seriality {
         return eventId;
     }
 
-    function readEvent(uint eventId)
-      public
-      view
-      returns(string memory title, string memory description, uint ticketPrice, uint ticketsAvailable, uint sales, bool isOpen)
-    {
-        title = events[eventId].title;
-        description = events[eventId].description;
-        ticketPrice = events[eventId].ticketPrice;
-        ticketsAvailable = events[eventId].ticketsAvailable;
-        sales = events[eventId].sales;
-        isOpen = events[eventId].isOpen;
-    }
-
-
+    /// @notice Allows anyone to buy specified number of tickets
+    /// @param eventId Id of the event, tickets to buy for
+    /// @param noOfTickets No. of tickets to buy
     function buyTickets(uint eventId, uint noOfTickets)
       public
       payable
@@ -97,6 +110,9 @@ contract EventManagement is Seriality {
         emit LogBuyTickets(eventId, msg.sender, noOfTickets);
     }
 
+    /// @notice Get the number of tickets the buyer bought
+    /// @eventId Id of the event
+    /// @return No of tickets bought
     function getBuyerNumberTickets(uint eventId)
       public
       view
@@ -105,7 +121,8 @@ contract EventManagement is Seriality {
         return events[eventId].buyers[msg.sender];
     }
 
-
+    /// @notice Allows owner to end sale of an event
+    /// @eventId Id of the event to end the sale for
     function endSale(uint eventId)
       public
       isOwner
@@ -118,16 +135,18 @@ contract EventManagement is Seriality {
         emit LogEndSale(eventId, owner, amountTotal);
     }
 
-    // Helper functions:
+    /// @notice Retrieves all of the event's info (except event's image's Ipfs Hash)
+    /// @return Array of individual event properties except for string type properties.
+    /// For passing string arrays it is first converted to bytes using Seriality library
+    /// See https://github.com/pouladzade/Seriality for more info
     function getEventsData()
       public
       view
       returns (uint[] memory ids, bytes memory titlesBuffer, bytes memory descriptionsBuffer, uint[] memory ticketsAvailable,
-      uint[] memory ticketsPrices, bool[] memory areOpen/*, string memory imagesIpfsHashesBuffer*/)
+      uint[] memory ticketsPrices, bool[] memory areOpen)
     {
         titlesBuffer = getEventsTitlesBuffer();
         descriptionsBuffer = getEventsDescriptionsBuffer();
-        // imagesIpfsHashesBuffer = events[eventIds[0]].imageIpfsHash; //getEventsImagesIpfsHashesBuffer();
 
         ids = new uint[](eventIds.length);
         ticketsAvailable = new uint[](eventIds.length);
@@ -142,6 +161,19 @@ contract EventManagement is Seriality {
         }
     }
 
+    /// @param eventId Id of the event
+    /// @return Ipfs has of event's image poster
+    function getEventImageIpfsHash(uint eventId)
+      public
+      view
+      returns (string memory)
+    {
+      return events[eventId].imageIpfsHash;
+    }
+
+    /// @notice Gets the buyer's purchases
+    /// @return purchasedEventIds Array of event Ids buyer purchased
+    /// @return ticketCounts Array consistion of no. of tickets purchased for distinct events
     function getBuyerPurchases()
       public
       view
@@ -159,8 +191,11 @@ contract EventManagement is Seriality {
        }
     }
 
+    // Helper functions:
+
+    /// @return No. of distinct events buyer purchased for
     function getBuyerEventPurchaseCount()
-      public
+      private
       view
       returns (uint)
     {
@@ -174,16 +209,11 @@ contract EventManagement is Seriality {
         return count;
     }
 
-    function getEventIds()
-      public
-      view
-      returns (uint[] memory)
-    {
-      return eventIds;
-    }
-
+    /// @notice See this library https://github.com/pouladzade/Seriality
+    /// and article https://medium.com/hackernoon/serializing-string-arrays-in-solidity-db4b6037e520
+    /// @return buffer bytes of events' titles array
     function getEventsTitlesBuffer()
-      public
+      private
       view
       returns(bytes memory)
     {
@@ -202,8 +232,11 @@ contract EventManagement is Seriality {
       return buffer;
     }
 
+    /// @notice See this library https://github.com/pouladzade/Seriality
+    /// and article https://medium.com/hackernoon/serializing-string-arrays-in-solidity-db4b6037e520
+    /// @return buffer bytes of events' descriptions array
     function getEventsDescriptionsBuffer()
-      public
+      private
       view
       returns(bytes memory)
     {
@@ -222,13 +255,19 @@ contract EventManagement is Seriality {
       return buffer;
     }
 
-
-    function getEventImageIpfsHash(uint eventId)
+    /// @param eventId Id of the event to read
+    /// @return individual properties of the event
+    function readEvent(uint eventId)
       public
       view
-      returns (string memory)
+      returns(string memory title, string memory description, uint ticketPrice, uint ticketsAvailable, uint sales, bool isOpen)
     {
-      return events[eventId].imageIpfsHash;
+        title = events[eventId].title;
+        description = events[eventId].description;
+        ticketPrice = events[eventId].ticketPrice;
+        ticketsAvailable = events[eventId].ticketsAvailable;
+        sales = events[eventId].sales;
+        isOpen = events[eventId].isOpen;
     }
 
 }
