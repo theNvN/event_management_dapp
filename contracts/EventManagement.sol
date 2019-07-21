@@ -57,6 +57,24 @@ contract EventManagement is Seriality {
         _;
     }
 
+    /*Checks if an event is open for sale of tickets*/
+    modifier isEventOpen(uint eventId) {
+        require(events[eventId].isOpen == true);
+        _;
+    }
+
+    /*Checks if enough value is paid to buy specified number of tickets*/
+    modifier paidEnough(uint eventId, uint ticketsCount) {
+        require(msg.value >= events[eventId].ticketPrice*ticketsCount);
+        _;
+    }
+
+    /*Checks if enough tickets are available to buy*/
+    modifier availableEnough(uint eventId, uint ticketsCount) {
+        require(events[eventId].ticketsAvailable >= ticketsCount);
+        _;
+    }
+
     /// @notice Adds an event to contract
     /// @param title Title of event
     /// @param description Description of the event
@@ -90,17 +108,16 @@ contract EventManagement is Seriality {
         return eventId;
     }
 
-    /// @notice Allows anyone to buy specified number of tickets
+    /// @notice Allows anyone to buy specified number of tickets. Extra value, if sent, is returned
     /// @param eventId Id of the event, tickets to buy for
     /// @param noOfTickets No. of tickets to buy
     function buyTickets(uint eventId, uint noOfTickets)
       public
       payable
+      isEventOpen(eventId)
+      paidEnough(eventId, noOfTickets)
+      availableEnough(eventId, noOfTickets)
     {
-        require(events[eventId].isOpen == true);
-        require(msg.value >= events[eventId].ticketPrice*noOfTickets);
-        require(events[eventId].ticketsAvailable >= noOfTickets);
-
         events[eventId].buyers[msg.sender] += noOfTickets;
         events[eventId].ticketsAvailable -= noOfTickets;
         events[eventId].sales = noOfTickets;
