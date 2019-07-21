@@ -3,7 +3,7 @@ pragma solidity ^0.5.0;
 import "./libraries/Seriality/src/Seriality.sol";
 
 /// @title Contract that manages multiple events (eg. parties, meetups)
-/// @autor Naveen Sahu
+/// @author Naveen Sahu
 /// @notice Buy tickets of an event and/or be the owner of contract to host your own events
 contract EventManagement is Seriality {
 
@@ -166,6 +166,7 @@ contract EventManagement is Seriality {
 
     /// @param eventId Id of the event
     /// @return Ipfs has of event's image poster
+    /// @dev Tried using seriality to fetch ipfs hashes in bulk (all at once), but somehow it doesn't work (crashes) for hash strings
     function getEventImageIpfsHash(uint eventId)
       public
       view

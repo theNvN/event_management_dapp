@@ -26,20 +26,14 @@ contract("EventManagement", function(accounts) {
     imageIpfsHash: "Qm5ec0nd1pf5PSR6G9KFPbuLV9aEqJfTk1y9B8pdwqK4Rq"
   }
 
-  const event3 = {
-    title: "event 3",
-    description: "event 3 description",
-    ticketsAvailable: 300,
-    ticketPrice: 3000,
-    imageIpfsHash: "Qmth1rd1pf5aPSR6G9KFPbuLV9aEqJfTk1y9B8pdwqK4Rq"
-  }
-
   beforeEach(async() => {
     instance = await EventManagement.new()
   })
 
   describe("Setup", async() => {
 
+    // Checks that deploying address of contract is set to owner variable
+    // Test written because some functions of contract must be executed only by owner address
     it("owner should be set to the deploying address", async() => {
         const owner = await instance.owner()
         assert.equal(owner, deployAccount, "the deploying address should be the owner")
@@ -50,6 +44,8 @@ contract("EventManagement", function(accounts) {
 
     describe("addEvent()", async() => {
 
+      // Checks that the event info stored in contract is same as the info provided
+      // Test written to ensure the integrity of data
       it("adding an event should emit an event with the provided event details", async() => {
         const tx = await instance.addEvent(event1.title, event1.description, event1.ticketPrice,
           event1.ticketsAvailable, event1.imageIpfsHash,  {from: deployAccount})
@@ -57,11 +53,13 @@ contract("EventManagement", function(accounts) {
 
         assert.equal(eventData.title, event1.title, "the added event titles should match")
         assert.equal(eventData.description, event1.description, "the added event descriptions should match")
-        assert.equal(eventData.ticketsAvailable.toString(10), event1.ticketsAvailable.toString(10), "the added event ticket amounts should match")
+        assert.equal(eventData.ticketsAvailable.toString(), event1.ticketsAvailable.toString(), "the added event ticket amounts should match")
         assert.equal(eventData.ticketPrice.toString(), event1.ticketPrice.toString(), "the added event ticket prices should match")
         assert.equal(eventData.imageIpfsHash, event1.imageIpfsHash, "the added event image ipfs hashes should match")
       })
 
+      // Checks if only owner is able to add an event.
+      // Test written to ensure that only owner and NO other address is able to add an event to contract
       it("only the owner should be able to add an event", async() => {
         await instance.addEvent(event1.title, event1.description, event1.ticketPrice,
           event1.ticketsAvailable, event1.imageIpfsHash,  {from: deployAccount})
@@ -73,6 +71,8 @@ contract("EventManagement", function(accounts) {
 
     describe("buyTickets()", async() => {
 
+      // Checks if tickets are only purchased when an event is open
+      // Test written to ensure that an address is able to purchase tickets only if event is open (ie. isOpen property of event is true)
       it("tickets should only be able to be purchased when the event is open", async() => {
         const numberOfTickets = 1
 
@@ -88,6 +88,9 @@ contract("EventManagement", function(accounts) {
         assert.equal(eventDetails['4'], numberOfTickets, `the ticket sales should be ${numberOfTickets}`)
       })
 
+      // Checks if tickets can be purchased only if enough value is sent
+      // Test written to ensure transaction successfully occurrs only if value sent is equal or more than enough to
+      // to successfully complete the transaction
       it("tickets should only be able to be purchased when enough value is sent with the transaction", async() => {
         const numberOfTickets = 1
         await instance.addEvent(event1.title, event1.description, event1.ticketPrice,
@@ -95,6 +98,8 @@ contract("EventManagement", function(accounts) {
         await catchRevert(instance.buyTickets(0, numberOfTickets, {from: firstAccount, value: event1.ticketPrice - 1}))
       })
 
+      // Checks that only number of tickets that can be purchased be equal to tickets remaining for sale at max
+      // Test written to ensure that an address shouldn't be able to purchase tickets more than there are available for sale at that point
       it("tickets should only be able to be purchased when there are enough tickets remaining", async() => {
         await instance.addEvent(event1.title, event1.description, event1.ticketPrice,
           event1.ticketsAvailable, event1.imageIpfsHash,  {from: deployAccount})
@@ -106,6 +111,8 @@ contract("EventManagement", function(accounts) {
 
     describe("endSale()", async() => {
 
+      // Checks if only owner has the privilege to end sale of an tickets of an event
+      // Test written to ensure that only owner address and NO other address is able to end sale
       it("only the owner should be able to end the sale and mark it as closed", async() => {
         await instance.addEvent(event1.title, event1.description, event1.ticketPrice,
           event1.ticketsAvailable, event1.imageIpfsHash,  {from: deployAccount})
@@ -117,6 +124,8 @@ contract("EventManagement", function(accounts) {
         assert.equal(eventData['5'], false, "The event isOpen variable should be marked false.")
       })
 
+      // Checks that owner address is sent correct amount
+      // Test written to ensure that owner is sent the value equal to the total sales amount of that event
       it("endSale() should emit an event with information about how much ETH was sent to the contract owner", async() => {
         const numberToPurchase = 3
 
