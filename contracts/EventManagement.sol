@@ -2,9 +2,12 @@ pragma solidity ^0.5.0;
 
 import "./libraries/Seriality/src/Seriality.sol";
 
+/// @title Contract that manages multiple events (eg. parties, meetups)
+/// @autor Naveen Sahu
+/// @notice Buy tickets of an event and/or be the owner of contract to host your own events
 contract EventManagement is Seriality {
 
-    /*Address of owner of contract*/
+    /*Address of owner (address that deopolyed it) of contract*/
     address payable public owner;
 
     /*For generating unique id of an event*/
@@ -137,7 +140,7 @@ contract EventManagement is Seriality {
 
     /// @notice Retrieves all of the event's info (except event's image's Ipfs Hash)
     /// @return Array of individual event properties except for string type properties.
-    /// For passing string arrays it is first converted to bytes using Seriality library
+    /// @dev For passing string arrays it is first converted to bytes using Seriality library
     /// See https://github.com/pouladzade/Seriality for more info
     function getEventsData()
       public
@@ -209,7 +212,7 @@ contract EventManagement is Seriality {
         return count;
     }
 
-    /// @notice See this library https://github.com/pouladzade/Seriality
+    /// @dev See this library https://github.com/pouladzade/Seriality
     /// and article https://medium.com/hackernoon/serializing-string-arrays-in-solidity-db4b6037e520
     /// @return buffer bytes of events' titles array
     function getEventsTitlesBuffer()
@@ -232,7 +235,7 @@ contract EventManagement is Seriality {
       return buffer;
     }
 
-    /// @notice See this library https://github.com/pouladzade/Seriality
+    /// @dev See this library https://github.com/pouladzade/Seriality
     /// and article https://medium.com/hackernoon/serializing-string-arrays-in-solidity-db4b6037e520
     /// @return buffer bytes of events' descriptions array
     function getEventsDescriptionsBuffer()
