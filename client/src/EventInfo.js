@@ -10,7 +10,6 @@ export class EventInfo extends Component {
   constructor(props) {
     super(props);
 
-    // console.log("props to eventInfo:", props);
     this.getEventStatusStyle = this.getEventStatusStyle.bind(this);
     this.getIpfsUrl = this.getIpfsUrl.bind(this);
   }
@@ -44,8 +43,8 @@ export class EventInfo extends Component {
           <form id="infoFormBuyTickets">
             <div>Enter ticket count: </div>
             <input id="infoNoOfTicketsToBuy" type="number" min={1} max={this.props.event.ticketsAvailable}
-              value={this.props.inputNoOfTickets} onChange={this.props.handleNoOfTicketsChange}/>
-            <input type="submit" value="Buy" onClick={this.props.buyTickets} disabled={!this.props.event.isOpen}/>
+              value={this.props.inputNoOfTickets} onChange={this.props.handleNoOfTicketsChange} disabled={!this.props.event.isOpen || this.props.isStopped}/>
+            <input type="submit" value="Buy" onClick={this.props.buyTickets} disabled={!this.props.event.isOpen || this.props.isStopped}/>
           </form>
         </div>
         {this.props.isLoginAddressOwner ?

@@ -29,6 +29,9 @@ const FIELD_USER_EVENT_TICKET_COUNT = 1;
 
 const oneGWei = 1000000000;
 
+const styleActivate = {background: '#008000'};
+const styleDeactivate = {background: '#ff3300'};
+
 class App extends Component {
 
   constructor(props) {
@@ -39,6 +42,7 @@ class App extends Component {
       accounts: null,
       contract: null,
 
+      isStopped: false,
       loginAddress: "0x0000000000000000000000000000000000000000",
       owner: "0x0000000000000000000000000000000000000000",
       loginAddressBalance: 0,
@@ -71,6 +75,7 @@ class App extends Component {
     this.showUserEvents = this.showUserEvents.bind(this);
     this.endSale = this.endSale.bind(this);
     this.captureFile = this.captureFile.bind(this);
+    this.toggleActivation = this.toggleActivation.bind(this);
   }
 
   componentDidMount = async () => {
@@ -410,6 +415,28 @@ class App extends Component {
     }
   }
 
+  toggleActivation = async(event) => {
+    console.log("toggled activation");
+    this.state.contract.methods.toggleActive()
+    .send({from: this.state.loginAddress})
+    .on('receipt', (receipt) => {
+      const isStopped = receipt.events.LogActivationSwitched.returnValues['isStopped'];
+
+      console.log("isStopped: ", isStopped);
+      this.state.web3.eth.getBalance(this.state.loginAddress)
+      .then((balance) => {
+        this.setState({
+          loginAddressBalance: balance,
+          isStopped: isStopped
+        });
+      });
+
+    })
+    .on('error', (error) => {
+      console.log("Error ocurred:", error);
+    });
+  }
+
   render() {
     if (!this.state.web3) {
       return <div>Loading Web3, accounts, and contract...</div>;
@@ -431,6 +458,7 @@ class App extends Component {
           selectedEventId={this.state.selectedEventId}
           event={this.state.events[this.state.selectedEventId]}
           isLoginAddressOwner={this.state.owner == this.state.loginAddress}
+          isStopped={this.state.isStopped}
           handleNoOfTicketsChange={this.handleNoOfTicketsChange}
           buyTickets={this.buyTickets}
           endSale={this.endSale}
@@ -443,6 +471,7 @@ class App extends Component {
           inputEventTicketsCount={this.state.inputEventTicketsCount}
           inputEventTicketPrice={this.state.inputEventTicketPrice}
           inputEventDescription={this.state.inputEventDescription}
+          isStopped={this.state.isStopped}
           handleEventTitleChange={this.handleEventTitleChange}
           handleEventTicketsCountChange={this.handleEventTicketsCountChange}
           handleEventTicketPriceChange={this.handleEventTicketPriceChange}
@@ -464,9 +493,23 @@ class App extends Component {
       <div className="wrapper">
         <div id="appTitle">Event Management</div>
         <div className="container">
-          <div id="userLoginAddress">
+          <div id="loginAddressInfo">
+
+            <div id="userLoginAddress">
             <span id="loginAddressLabel">{this.state.owner == this.state.loginAddress ? "Owner " : "User "}</span>
-            {this.state.loginAddress}</div>
+            {this.state.loginAddress}
+            </div>
+
+            {
+            this.state.owner == this.state.loginAddress ?
+            <button id="toggleActivationBtn" onClick={this.toggleActivation} style={this.state.isStopped ? styleActivate : styleDeactivate }>
+              {this.state.isStopped ? "ACTIVATE" : "DEACTIVATE"}
+            </button>
+            :
+            ""
+            }
+
+          </div>
           <div id="loginAddressBalance">Balance:&nbsp; {this.state.loginAddressBalance/oneGWei} gWei</div>
           {renderComponent}
         </div>

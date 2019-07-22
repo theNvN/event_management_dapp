@@ -7,6 +7,9 @@ import "./libraries/Seriality/src/Seriality.sol";
 /// @notice Buy tickets of an event and/or be the owner of contract to host your own events
 contract EventManagement is Seriality {
 
+    /*Switch for the circuit breaker*/
+    bool stopped;
+
     /*Address of owner (address that deopolyed it) of contract*/
     address payable public owner;
 
@@ -46,9 +49,16 @@ contract EventManagement is Seriality {
     event LogGetRefund(uint id, address accountRefunded, uint numTickets);
     event LogEndSale(uint id, address owner, uint balance);
 
+    event LogActivationSwitched(bool isStopped);
+
     /// @notice Deploying address is set as owner of contract
     constructor() public {
         owner = msg.sender;
+    }
+
+    modifier onlyIfActive() {
+        require(!stopped);
+        _;
     }
 
     /*Checks if sender address is owner*/
@@ -75,6 +85,15 @@ contract EventManagement is Seriality {
         _;
     }
 
+    /* Toggle function for breaking and joining the circuit*/
+    function toggleActive()
+      public
+      isOwner
+    {
+        stopped = !stopped;
+        emit LogActivationSwitched(stopped);
+    }
+
     /// @notice Adds an event to contract
     /// @param title Title of event
     /// @param description Description of the event
@@ -85,6 +104,7 @@ contract EventManagement is Seriality {
     function addEvent(string memory title, string memory description, uint price, uint ticketsAvailable, string memory imageIpfsHash)
       public
       isOwner
+      onlyIfActive
       returns (uint)
     {
         Event memory evt;
@@ -114,6 +134,7 @@ contract EventManagement is Seriality {
     function buyTickets(uint eventId, uint noOfTickets)
       public
       payable
+      onlyIfActive
       isEventOpen(eventId)
       paidEnough(eventId, noOfTickets)
       availableEnough(eventId, noOfTickets)
