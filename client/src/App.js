@@ -153,11 +153,14 @@ class App extends Component {
         };
       }
 
+      const isStopped = await instance.methods.stopped().call();
+
       // Set state
       this.setState({
        web3,
        accounts,
        contract: instance,
+       isStopped,
        owner,
        loginAddress: accounts[0],
        events,

@@ -8,7 +8,7 @@ import "./libraries/Seriality/src/Seriality.sol";
 contract EventManagement is Seriality {
 
     /*Switch for the circuit breaker*/
-    bool stopped;
+    bool public stopped;
 
     /*Address of owner (address that deopolyed it) of contract*/
     address payable public owner;
