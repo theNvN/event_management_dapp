@@ -1,0 +1,3 @@
+Testnet Used: rinkeby
+
+Deployed contract address: 0xe10D4f72abC7D67B9BcA8df244c1de44629b95E2
