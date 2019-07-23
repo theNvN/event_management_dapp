@@ -49,7 +49,7 @@ export class EventInfo extends Component {
         </div>
         {this.props.isLoginAddressOwner ?
         <button id="endSaleBtn" onClick={this.props.endSale} value={this.props.selectedEventId} disabled={!this.props.event.isOpen}>
-          CLOSE EVENT & WITHDRAW AMOUNT
+          {this.props.event.isOpen ? "CLOSE EVENT & WITHDRAW AMOUNT" : "EVENT CLOSED"}
         </button>
         :
         ""}

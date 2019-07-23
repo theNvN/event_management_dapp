@@ -311,7 +311,7 @@ class App extends Component {
 
         const id = receipt.events.LogEventAdded.returnValues['id'];
         const title = receipt.events.LogEventAdded.returnValues['title'];
-        const description = receipt.events.LogEventAdded.returnValues['desc'];
+        const description = receipt.events.LogEventAdded.returnValues['description'];
         const ticketPrice = receipt.events.LogEventAdded.returnValues['ticketPrice'];
         const ticketsAvailable = receipt.events.LogEventAdded.returnValues['ticketsAvailable'];
         const isOpen = true; // by default
