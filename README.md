@@ -20,7 +20,7 @@ Following are the user stories which clarify functionality of this app:
 
 * User/Owner taps any event, i.e. it's image in __Events__ section. __Event Info__ section is shown, displaying event's information along with ticket buying form asking for number of tickets to buy. If logged in address was identified as __Owner__, __Close Event & Withdraw Amount__ button is shown otherwise NOT. Entering invalid input (exceeded number, non-numeric etc.) shows alert message asking to enter valid input. Upon entering valid input and tapping __Buy__ button, the event is added to __Participated Events__ section for address that bought tickets & balance updates, provided transaction was successful.
 
-* Owner taps __Close Event & Withdraw Amount__ button in __Event Info__ section. An alert message is shown saying event is closed, __Close Event & Withdraw Amount__ button is disabled & balance updates, provided transaction was successful. Event that was closed is now labeled __CLOSED__ instead of __OPEN__ in __Events__, __Event Info__ & __Participated Events__ section.  __BUY__ button is disabled now.
+* Owner taps __Close Event & Withdraw Amount__ button in __Event Info__ section. An alert message is shown saying event is closed, __Close Event & Withdraw Amount__ button is disabled, now labeled as __Event Closed__ & balance updates, provided transaction was successful. Event that was closed is now labeled __CLOSED__ instead of __OPEN__ in __Events__, __Event Info__ & __Participated Events__ section.  __BUY__ button is disabled now.
 
 
 ## Installation
