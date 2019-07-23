@@ -46,6 +46,7 @@
 }
 
 #infoEventDescription {
+  white-space: pre-line;
   align-self: flex-start;
   margin: 10px 40px;
 }
