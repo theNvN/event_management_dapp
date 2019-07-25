@@ -11,11 +11,13 @@ import { EventInfo } from './EventInfo.js';
 import { EventForm } from './EventForm.js';
 import { UserEvents } from './UserEvents.js';
 
+// Constants for react state - view_mode for controlling display of different sections of apps
 const VIEW_MODE_EVENTS_LIST = 'events_list';
 const VIEW_MODE_EVENT_INFO = 'event_info';
 const VIEW_MODE_EVENT_FORM = 'event_form';
 const VIEW_MODE_EVENT_USER = 'event_user';
 
+// Field indices for event
 const FIELD_ID = 0;
 const FIELD_TITLE = 1;
 const FIELD_DESCRIPTION = 2;
@@ -24,11 +26,14 @@ const FIELD_TICKET_PRICE = 4;
 const FIELD_IS_OPEN = 5;
 const FIELD_IMAGE_IPFS_HASH = 6;
 
+// Field indices for a participated event
 const FIELD_USER_EVENT_ID = 0;
 const FIELD_USER_EVENT_TICKET_COUNT = 1;
 
+// Value of one gWei in wei
 const oneGWei = 1000000000;
 
+// For dynamically styling activation button
 const styleActivate = {background: '#008000'};
 const styleDeactivate = {background: '#ff3300'};
 
@@ -104,6 +109,7 @@ class App extends Component {
         });
       });
 
+      // Get the gas price and store as state
       web3.eth.getGasPrice()
       .then((result) => {
         let gasPrice = Number(result);
@@ -112,6 +118,7 @@ class App extends Component {
         });
       });
 
+      // Get all of the events info
       const eventsData = await instance.methods.getEventsData().call();
 
       const eventIds = eventsData[FIELD_ID];
@@ -137,6 +144,7 @@ class App extends Component {
         };
       }
 
+      // Get all info of events logged in address participated in
       const buyerTicketsData = await instance.methods.getBuyerPurchases().call({from: accounts[0]});
       const userEventIds = buyerTicketsData[FIELD_USER_EVENT_ID];
       const userEventTicketCounts = buyerTicketsData[FIELD_USER_EVENT_TICKET_COUNT];
@@ -153,6 +161,7 @@ class App extends Component {
         };
       }
 
+      // Get activation state of contract (used circuit breaker pattern in contract)
       const isStopped = await instance.methods.stopped().call();
 
       // Set state
@@ -184,12 +193,15 @@ class App extends Component {
 
   buyTickets = async(event) => {
     event.preventDefault();
+
+    // Sanity Checking
     if (this.state.inputNoOfTickets <= 0 || this.state.inputNoOfTickets == ""
       || this.state.inputNoOfTickets > this.state.events[this.state.selectedEventId].ticketsAvailable) {
       alert("Enter a valid input!");
       return;
     }
 
+    // Value to send so that transaction hopefully occurs
     let estimatedValue =  2*this.state.gasPrice +
       this.state.events[this.state.selectedEventId].ticketPrice*this.state.inputNoOfTickets;
 
@@ -202,6 +214,7 @@ class App extends Component {
       let newEventsList = Object.assign({}, this.state.events);
       newEventsList[eventId].ticketsAvailable -= numTickets;
 
+      // If initially purchased same event's tickets we'll add it to ones being purchased now
       let initialPurchaseCount = 0;
       if (this.state.participatedEvents[eventId] != undefined) {
         initialPurchaseCount = this.state.participatedEvents[eventId].ticketPurchaseCount;
@@ -216,6 +229,7 @@ class App extends Component {
         imageIpfsHash: this.state.events[eventId].imageIpfsHash
       };
 
+      // Since transaction upadtes user's balance we'll update balance display too while setting state
       this.state.web3.eth.getBalance(this.state.loginAddress)
       .then((balance) => {
         console.log("newBalance ", balance);
@@ -284,6 +298,7 @@ class App extends Component {
   addEvent = async(event) => {
     event.preventDefault();
 
+    // Sanity check
     if (this.state.inputEventTitle == "" || this.state.inputEventDescription == ""
       || this.state.inputEventTicketPrice == "" || this.state.inputEventTicketsCount == ""
       || this.state.currentFileBuffer == null) {
@@ -291,6 +306,8 @@ class App extends Component {
         return;
       }
 
+    // Since uploading to ipfs will take a few seconds we'll assume it's working and disable Submit button
+    // to prevent some unexpected behavior
     this.setState({
       isWorking: true
     });
@@ -328,7 +345,7 @@ class App extends Component {
           ticketsAvailable: ticketsAvailable,
           isOpen: isOpen,
           imageIpfsHash: imageIpfsHash,
-          isWorking: false
+          isWorking: false // done working
         };
 
         this.state.web3.eth.getBalance(this.state.loginAddress)
@@ -382,6 +399,7 @@ class App extends Component {
         };
       }
 
+      // Since transaction upadtes user's balance we'll update balance display too while setting state
       this.state.web3.eth.getBalance(this.state.loginAddress)
       .then((balance) => {
         this.setState({
@@ -418,14 +436,13 @@ class App extends Component {
     }
   }
 
+  // Used with switch breaker pattern to toggle activation/deactivation of some contract functions
   toggleActivation = async(event) => {
-    console.log("toggled activation");
     this.state.contract.methods.toggleActive()
     .send({from: this.state.loginAddress})
     .on('receipt', (receipt) => {
       const isStopped = receipt.events.LogActivationSwitched.returnValues['isStopped'];
 
-      console.log("isStopped: ", isStopped);
       this.state.web3.eth.getBalance(this.state.loginAddress)
       .then((balance) => {
         this.setState({
@@ -445,6 +462,7 @@ class App extends Component {
       return <div>Loading Web3, accounts, and contract...</div>;
     }
 
+    // Decide component to render according to view_mode state
     let renderComponent;
     if (this.state.viewMode == VIEW_MODE_EVENTS_LIST) {
       renderComponent = (

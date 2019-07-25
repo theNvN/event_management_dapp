@@ -1,6 +1,7 @@
 import React, { Component } from "react";
 import './UserEvents.css';
 
+// For dynamically styling labels - OPEN/CLOSED of events
 const styleOpen = {color: '#008000'};
 const styleClosed = {color: '#ff3300'};
 
@@ -21,10 +22,12 @@ export class UserEvents extends React.Component {
     return styleClosed;
   }
 
+  // get Ipfs url string given ipfs hash
   getIpfsUrl(ipfsHash) {
     return ("https://ipfs.io/ipfs/" + ipfsHash);
   }
 
+  // Convert Events Object to array type and return
   getParticipatedEventsArray() {
     return Object.keys(this.props.participatedEvents).map((key) => {
       return {

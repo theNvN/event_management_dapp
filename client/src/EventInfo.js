@@ -1,9 +1,11 @@
 import React, { Component } from "react";
 import './EventInfo.css';
 
+// For dynamically styling labels - OPEN/CLOSED of events
 const styleOpen = {color: '#008000'};
 const styleClosed = {color: '#ff3300'};
 
+// Value of one gWei in wei
 const oneGWei = 1000000000;
 
 export class EventInfo extends Component {
@@ -22,6 +24,7 @@ export class EventInfo extends Component {
     return styleClosed;
   }
 
+  // get Ipfs url string given ipfs hash
   getIpfsUrl(ipfsHash) {
     return ("https://ipfs.io/ipfs/" + ipfsHash);
   }

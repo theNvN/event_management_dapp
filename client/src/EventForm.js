@@ -1,6 +1,7 @@
 import React, { Component } from "react";
 import './EventForm.css';
 
+// Value of one gWei in wei
 const oneGWei = 1000000000;
 
 export class EventForm extends Component {
@@ -10,6 +11,7 @@ export class EventForm extends Component {
     this.getIpfsUrl = this.getIpfsUrl.bind(this);
   }
 
+  // get Ipfs url string given ipfs hash
   getIpfsUrl() {
     return ("https://ipfs.io/ipfs/" + this.props.ipfsHash);
   }

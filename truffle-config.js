@@ -1,8 +1,11 @@
 const path = require("path");
 
 // var HDWalletProvider = require('truffle-hdwallet-provider');
-// const infuraUrl = "https://rinkeby.infura.io/v3/<PROJECT-ID>";
-// const mnemonic = "";
+
+// const infuraRinkebyUrl = "https://rinkeby.infura.io/v3/<PROJECT-ID>";
+// const infuraRopstenUrl = "https://ropsten.infura.io/v3/<PROJECT-ID>"";
+//
+// const mnemonic = ";
 
 module.exports = {
   // See <http://truffleframework.com/docs/advanced/configuration>
@@ -16,9 +19,15 @@ module.exports = {
     },
 
     // rinkeby: {
-    //   provider: () => new HDWalletProvider(mnemonic, infuraUrl),
+    //   provider: () => new HDWalletProvider(mnemonic, infuraRinkebyUrl),
     //   network_id: 4,
     //   gas: 5500000
+    // },
+
+    // ropsten: {
+    //   provider: () => new HDWalletProvider(mnemonic, infuraRopstenUrl),
+    //   network_id: 3,
+    //   gas: 4000000
     // }
 
   }
